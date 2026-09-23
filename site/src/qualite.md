@@ -117,7 +117,7 @@ display(ev ? html`<p>Pour <strong>${pourcent(part, 1)}</strong> des événements
 <p>Évaluation sur ${ev.echantillon} annonces dont le secteur est connu par Sirene : <strong>${pourcent(ev.politique_retenue.part_division + ev.politique_retenue.part_section)}</strong> reçoivent un secteur, avec une précision de <strong>${pourcent(ev.politique_retenue.precision_globale_attribuees)}</strong> (division : ${pourcent(ev.politique_retenue.precision_division)} ; section seule : ${pourcent(ev.politique_retenue.precision_section)}).</p>
 ${Inputs.table(ev.calibration, {header: {confiance: "Confiance du modèle", annonces: "Annonces", division_juste: "Division juste"}, format: {division_juste: (v) => pourcent(v)}, layout: "auto"})}
 <p class="note">La justesse croît avec la confiance annoncée : c'est ce qui permet de fixer un seuil. Seul le texte d'activité est envoyé au modèle (ni nom, ni SIREN, ni adresse). Évalué le ${ev.evalue_le.slice(0, 10)}.</p>`
-: html`<p class="note">Enrichissement non activé lors de cette exécution.</p>`);
+: html`<p class="note">Aucune évaluation de l'attribution par IA n'est disponible. Part des événements classés par Jev : ${pourcent(part, 1)}.</p>`);
 ```
 
 ## Historique des contrôles

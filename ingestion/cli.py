@@ -90,7 +90,8 @@ def evaluer_jev(cfg: Config, n: int) -> None:
 
     resultat = jev.evaluer(cfg, n)
     jev.ecrire_rapport(resultat)
-    (cfg.raw / "enrichissement" / "evaluation.json").write_text(
+    # Versionnée (docs/) : l'évaluation est un résultat de référence, relu par l'export en CI.
+    (RACINE / "docs" / "evaluation_jev.json").write_text(
         json.dumps(resultat, ensure_ascii=False, indent=1), encoding="utf-8"
     )
     p = resultat["politique_retenue"]

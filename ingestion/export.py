@@ -262,7 +262,7 @@ def construire_qualite(
     target = cfg.data_dir / "dbt" / "target"
     tests = _resultats_dbt(target / "run_results.json")
     fraicheur_dbt = _fraicheur_dbt(target / "sources.json")
-    evaluation_path = cfg.raw / "enrichissement" / "evaluation.json"
+    evaluation_path = RACINE / "docs" / "evaluation_jev.json"
     jev = None
     if evaluation_path.exists():
         ev = json.loads(evaluation_path.read_text(encoding="utf-8"))
