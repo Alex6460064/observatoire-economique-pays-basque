@@ -98,5 +98,6 @@ libellés `naf2008_liste_n1.xls` / `n2.xls` sur insee.fr.
 ## Jev (TypeSafe) — enrichissement optionnel
 
 API `POST /v1/systemone`, modèle figé `jev-1.13.0`, 0,042 $ par million de tokens en entrée,
-coût négligeable à ce volume (quelques centaines d'appels par an). Utilisé uniquement pour classer le texte d'activité des annonces
+~3 800 tokens par annonce (88 options), soit environ 0,05 $ pour 300 annonces ; débit mesuré de 78 annonces/s
+avec 32 requêtes en parallèle. Utilisé uniquement pour classer le texte d'activité des annonces
 sans NAF. Évaluation : `docs/evaluation_jev.md`.

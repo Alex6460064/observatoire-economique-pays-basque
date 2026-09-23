@@ -150,6 +150,13 @@ seul le texte d'activité est envoyé, étape ignorée sans clé.
 **Alternatives.** Règles par mots-clés (fragiles, longues à maintenir) ; LLM génératif (plus cher,
 sortie non typée, pas de probabilités calibrées).
 
+**Débit (mesuré sur 300 annonces).** Une requête par annonce, 8 en parallèle : 23 annonces/s ;
+32 en parallèle : 78 annonces/s, précision inchangée. Regrouper 10 annonces par requête (motif
+« fan-out ») : 87 annonces/s seulement, sans gain de tokens (chaque question porte ses 88 options)
+et au prix d'un `state` mêlant plusieurs annonces, ce que la documentation de Jev déconseille ;
+25 annonces par requête dépassent la limite de contexte. Retenu : une annonce par requête,
+parallélisme 32.
+
 **Conséquences.** + part des événements sans secteur réduite de 6,8 % à 4,4 %, précision mesurée
 de 86 % sur les attributions, publiée sur la page qualité. − dépendance à un service tiers,
 isolée et non bloquante ; la vérité terrain (code APE Sirene) est elle-même imparfaite.

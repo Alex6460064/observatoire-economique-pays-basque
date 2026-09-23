@@ -42,4 +42,6 @@ jev:
   modele: "jev-1.13.0"
   seuil_division: 0.9
   seuil_section: 0.8
-  concurrence: 8
+  # Mesuré le 23/09/2026 sur 300 annonces : 8 -> 23 annonces/s ; 32 -> 78 annonces/s, même
+  # précision. Regrouper plusieurs annonces par requête n'apporte que +12 % (voir ADR-0008).
+  concurrence: 32

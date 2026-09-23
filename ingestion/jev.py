@@ -160,7 +160,7 @@ async def _classer_async(
 
 
 def classer(
-    textes: dict[str, str], nomenclature: Nomenclature, modele: str, concurrence: int = 8
+    textes: dict[str, str], nomenclature: Nomenclature, modele: str, concurrence: int = 32
 ) -> dict[str, Reponse]:
     """Classe chaque texte (clé -> texte). Point d'injection unique pour les tests."""
     if not textes:
