@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+      - name: Dépendances
+        run: uv sync --frozen
+      - name: Lint et format
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Tests unitaires (sans réseau)
+        run: uv run pytest
+      - name: Compilation des modèles dbt
+        # `parse` valide SQL Jinja, références et YAML sans données ni réseau.
+        env:
+          OBS_DATA_DIR: ${{ runner.temp }}/data
+        run: uv run dbt parse --project-dir . --profiles-dir .

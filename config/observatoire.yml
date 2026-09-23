@@ -1,0 +1,44 @@
+# Configuration de l'observatoire. Aucune liste de communes « de production » ici :
+# le périmètre de référence est lu au COG en vigueur via le code SIREN de l'EPCI.
+
+perimetre_defaut: capb
+
+perimetres:
+  capb:
+    libelle: "Communauté d'agglomération Pays Basque"
+    epci: "200067106"           # vérifié sur geo.api.gouv.fr le 23/09/2026 : 158 communes
+  bab_littoral:
+    # Sous-périmètre de développement (runs rapides). Filtre appliqué APRÈS lecture
+    # de l'EPCI : une commune qui quitterait la CAPB sortirait aussi de ce périmètre.
+    libelle: "BAB + littoral (développement)"
+    epci: "200067106"
+    communes: ["64102", "64024", "64122", "64140", "64125", "64249", "64483", "64189", "64545", "64260"]
+
+parametres:
+  # Secret statistique : aucune case publiée entre 1 et seuil-1 (voir docs/methodologie.md).
+  seuil_secret: 5
+  # Profondeur d'historique Sirene / BODACC, en mois pleins avant le mois courant.
+  historique_mois: 36
+  # Premier millésime BMO ingéré. 2023 = FAP2009 ; FAP2021 à partir de 2024.
+  bmo_annee_min: 2023
+  # Composition communale des bassins BMO (page méthodologie du millésime 2026).
+  bmo_bassins_url: "https://statistiques.francetravail.org/bmo/Handlers/HTFile.ashx?MEDIAID=188096"
+  # Mois récents considérés comme provisoires (retard d'enregistrement / de publication).
+  mois_provisoires_sirene: 2
+  mois_provisoires_bodacc: 2
+
+sources:
+  sirene_dataset: "base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret"
+  bodacc_api: "https://bodacc-datadila.opendatasoft.com/api/explore/v2.1/catalog/datasets/annonces-commerciales"
+  naf_niveaux: "https://www.insee.fr/fr/statistiques/fichier/2120875/naf2008_5_niveaux.xls"
+  naf_sections: "https://www.insee.fr/fr/statistiques/fichier/2120875/naf2008_liste_n1.xls"
+  naf_divisions: "https://www.insee.fr/fr/statistiques/fichier/2120875/naf2008_liste_n2.xls"
+
+# Attribution sectorielle des annonces BODACC sans code NAF, par Jev (TypeSafe).
+# Optionnelle : ignorée sans TYPESAFE_API_KEY. Seuils fixés par `obs evaluer-jev`
+# (voir docs/evaluation_jev.md) ; modèle figé pour que les seuils restent valides.
+jev:
+  modele: "jev-1.13.0"
+  seuil_division: 0.9
+  seuil_section: 0.8
+  concurrence: 8

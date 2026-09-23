@@ -1,0 +1,89 @@
+version: 2
+
+models:
+  - name: stg_geo__communes_perimetre
+    description: "Communes du périmètre étudié (COG en vigueur, geo.api.gouv.fr)."
+    columns:
+      - name: code_commune
+        description: "Code officiel géographique (INSEE) de la commune."
+        data_tests: [unique, not_null]
+      - name: population
+        description: "Population municipale selon geo.api.gouv.fr."
+        data_tests:
+          - not_null
+          - expression: {arguments: {expression: "> 0"}}
+
+  - name: stg_geo__codes_postaux
+    description: "Couples (code postal, commune) des départements du périmètre, avec libellé normalisé pour le rapprochement BODACC."
+    columns:
+      - name: code_postal
+        data_tests: [not_null]
+      - name: code_commune
+        data_tests: [not_null]
+
+  - name: stg_naf__secteurs
+    description: "Sous-classes NAF rév. 2 avec division et section (libellés INSEE)."
+    columns:
+      - name: code_naf
+        data_tests: [unique, not_null]
+      - name: code_section
+        data_tests: [not_null]
+      - name: libelle_section
+        data_tests: [not_null]
+
+  - name: stg_sirene__etablissements
+    description: "Établissements Sirene des départements du périmètre (sans colonne nominative ni adresse)."
+    columns:
+      - name: siret
+        description: "Identifiant de l'établissement (14 chiffres). Usage interne uniquement, jamais publié."
+        data_tests: [unique, not_null]
+      - name: statut_diffusion
+        description: "O = diffusible ; P = diffusion partielle (compté en agrégat, jamais affiché individuellement)."
+        data_tests:
+          - accepted_values: {arguments: {values: ["O", "P"]}}
+      - name: etat_administratif
+        data_tests:
+          - accepted_values: {arguments: {values: ["A", "F"]}}
+      - name: code_commune
+        description: "Code commune INSEE de l'établissement."
+
+  - name: stg_sirene__unites_legales
+    description: "Unités légales Sirene ayant au moins un établissement dans les départements du périmètre."
+    columns:
+      - name: siren
+        data_tests: [unique, not_null]
+
+  - name: stg_sirene__liens_succession
+    description: "Liens de succession entre établissements (transferts, reprises) dont le successeur est dans le périmètre départemental."
+
+  - name: stg_bodacc__annonces
+    description: "Annonces BODACC minimisées (aucun nom, aucune adresse), fenêtre d'historique."
+    columns:
+      - name: id_annonce
+        description: "Identifiant BODACC : lettre de publication + n° de parution + n° d'annonce."
+        data_tests: [unique, not_null]
+      - name: type_avis
+        data_tests:
+          - accepted_values: {arguments: {values: ["annonce", "rectificatif", "annulation"]}}
+      - name: famille_avis
+        data_tests:
+          - accepted_values: {arguments: {values: ["creation", "immatriculation", "vente", "collective", "radiation"]}}
+      - name: siren
+        data_tests:
+          - expression: {arguments: {expression: "similar to '[0-9]{9}'"}}
+
+  - name: stg_bmo__projets
+    description: "Enquête BMO, lignes métier × bassin des départements du périmètre, tous millésimes ingérés."
+    columns:
+      - name: projets
+        description: "Nombre de projets de recrutement ; null si secret statistique France Travail."
+        data_tests:
+          - expression: {arguments: {expression: ">= 0"}}
+      - name: annee
+        data_tests: [not_null]
+
+  - name: stg_bmo__bassins_communes
+    description: "Composition communale des bassins d'emploi BMO (zonage France Travail)."
+    columns:
+      - name: code_commune
+        data_tests: [unique, not_null]

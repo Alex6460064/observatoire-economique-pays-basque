@@ -1,0 +1,97 @@
+version: 2
+
+models:
+  - name: dim_communes
+    description: "Communes du périmètre avec population et bassin d'emploi BMO."
+    columns:
+      - name: code_commune
+        description: "Code commune INSEE (COG en vigueur)."
+        data_tests: [unique, not_null]
+      - name: nom_commune
+        description: "Libellé officiel."
+        data_tests: [not_null]
+      - name: population
+        description: "Population municipale (geo.api.gouv.fr)."
+      - name: code_bassin_bmo
+        description: "Bassin d'emploi BMO de rattachement (zonage France Travail)."
+        data_tests: [not_null]
+
+  - name: dim_secteurs
+    description: "Divisions et sections NAF rév. 2, plus la modalité ZZ « Activité non déterminée »."
+    columns:
+      - name: code_division
+        data_tests: [unique, not_null]
+      - name: code_section
+        data_tests: [not_null]
+
+  - name: dim_mois
+    description: "Mois publiés et statut de consolidation (consolide / provisoire / non_couvert) par famille de source."
+    columns:
+      - name: mois
+        data_tests: [unique, not_null]
+      - name: statut_sirene
+        data_tests:
+          - accepted_values: {arguments: {values: [consolide, provisoire, non_couvert]}}
+      - name: statut_bodacc
+        data_tests:
+          - accepted_values: {arguments: {values: [consolide, provisoire]}}
+
+  - name: fct_evenements_mensuels
+    description: >
+      Comptages bruts par indicateur × mois × commune × division NAF. Table interne : le secret
+      statistique est appliqué à l'export, jamais ici.
+    columns:
+      - name: indicateur
+        description: >
+          creations_etablissements | creations_entreprises | immatriculations_rcs | radiations_rcs |
+          cessions | defaillances. Définitions : docs/methodologie.md.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [creations_etablissements, creations_entreprises, immatriculations_rcs, radiations_rcs, cessions, defaillances]
+      - name: mois
+        data_tests:
+          - not_null
+          - relationships: {arguments: {to: ref('dim_mois'), field: mois}}
+      - name: code_commune
+        data_tests:
+          - not_null
+          - relationships: {arguments: {to: ref('dim_communes'), field: code_commune}}
+      - name: code_division
+        data_tests:
+          - not_null
+          - relationships: {arguments: {to: ref('dim_secteurs'), field: code_division}}
+      - name: detail
+        description: "Pour les défaillances : liquidation | redressement | sauvegarde | autre."
+      - name: valeur
+        description: "Nombre d'événements."
+        data_tests:
+          - not_null
+          - expression: {arguments: {expression: "> 0"}}
+
+  - name: mart_bmo_familles
+    description: "Projets de recrutement BMO par bassin × année × famille de métiers (minorants si secret France Travail)."
+    columns:
+      - name: projets
+        description: "Somme des projets non secrets."
+      - name: nb_metiers_secret
+        description: "Nombre de lignes métier couvertes par le secret France Travail."
+
+  - name: mart_bmo_metiers
+    description: "Projets BMO par métier pour les bassins du périmètre."
+
+  - name: mart_bmo_recouvrement
+    description: "Recouvrement communes / population entre le périmètre et chaque bassin BMO concerné."
+    columns:
+      - name: code_bassin
+        data_tests: [unique, not_null]
+
+  - name: mart_qualite_indicateurs
+    description: "Contrôles de qualité chiffrés, avec seuil et statut, publiés sur la page qualité."
+    columns:
+      - name: metrique
+        data_tests: [unique, not_null]
+      - name: statut
+        data_tests:
+          - accepted_values: {arguments: {values: [ok, info]}}

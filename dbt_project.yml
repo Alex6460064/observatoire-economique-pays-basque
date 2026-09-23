@@ -1,0 +1,38 @@
+name: observatoire
+version: "0.1.0"
+config-version: 2
+profile: observatoire
+
+model-paths: ["models"]
+test-paths: ["quality"]
+macro-paths: ["macros"]
+clean-targets: ["target", "dbt_packages"]
+
+# Valeurs par défaut ; la CLI (`obs transformer`) les surcharge via --vars
+# à partir de config/observatoire.yml (source unique de vérité).
+vars:
+  date_reference: "2026-09-23"
+  debut_historique: "2023-09-01"
+  seuil_secret: 5
+  mois_provisoires_sirene: 2
+  mois_provisoires_bodacc: 2
+  # Seuils qualité bloquants
+  taux_min_jointure_bodacc_sirene: 0.90
+  taux_min_localisation_bodacc: 0.90
+
+models:
+  observatoire:
+    +persist_docs: {relation: true, columns: true}
+    staging:
+      +materialized: view
+      +schema: staging
+    intermediate:
+      +materialized: table
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts
+
+data_tests:
+  observatoire:
+    +store_failures: false

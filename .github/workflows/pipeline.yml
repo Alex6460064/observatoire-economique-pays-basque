@@ -1,0 +1,113 @@
+name: Pipeline et publication
+
+# Exécution quotidienne : le BODACC paraît les jours ouvrés ; le stock Sirene (mensuel)
+# n'est relu que lorsqu'une nouvelle version est publiée (clé = URL de la ressource).
+# Un échec à n'importe quelle étape (ingestion, tests dbt, fraîcheur, secret statistique,
+# build du site) arrête le workflow : rien n'est publié, la version en ligne reste la précédente.
+on:
+  schedule:
+    - cron: "30 5 * * *"
+  workflow_dispatch:
+    inputs:
+      forcer:
+        description: "Ignorer les caches et tout relire depuis les sources"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write # historique agrégé poussé sur la branche `donnees`
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pipeline
+  cancel-in-progress: false
+
+env:
+  OBS_DATA_DIR: ${{ github.workspace }}/data
+  OBS_HISTORIQUE_DIR: ${{ github.workspace }}/historique
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Historique (branche donnees)
+        run: |
+          git config user.name "observatoire-bot"
+          git config user.email "observatoire-bot@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin donnees; then
+            git fetch origin donnees:donnees
+            git worktree add historique donnees
+          else
+            git worktree add --orphan -b donnees historique
+          fi
+
+      - name: Cache des extractions (Sirene filtré, BODACC minimisé, attributions Jev)
+        uses: actions/cache@v6
+        with:
+          path: data/raw
+          key: raw-${{ github.run_id }}
+          restore-keys: raw-
+
+      - uses: astral-sh/setup-uv@v10
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+
+      - name: Ingestion, transformation, contrôles, enrichissement, export
+        env:
+          TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+        run: uv run obs run ${{ inputs.forcer && '--forcer' || '' }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Build du tableau de bord
+        working-directory: site
+        run: |
+          npm ci
+          npm run build
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site/dist
+
+      - name: Pousser l'historique agrégé
+        working-directory: historique
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "historique inchangé"
+          else
+            git commit -m "historique : run du $(date -u +%F)"
+            git push origin donnees
+          fi
+
+      - name: Journal des extractions (artefact)
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: journal-${{ github.run_id }}
+          path: |
+            data/journal/extractions.jsonl
+            data/dbt/target/run_results.json
+            data/dbt/target/sources.json
+          if-no-files-found: ignore
+
+  publication:
+    # Activer en posant la variable de dépôt PUBLIER_PAGES=true une fois GitHub Pages
+    # configuré (Settings > Pages > Source : GitHub Actions).
+    if: vars.PUBLIER_PAGES == 'true'
+    needs: pipeline
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - id: deploiement
+        uses: actions/deploy-pages@v5

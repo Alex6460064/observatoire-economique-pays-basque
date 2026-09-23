@@ -1,0 +1,25 @@
+select
+    id as id_annonce,
+    publication,
+    numero_parution,
+    date_parution,
+    numero_annonce,
+    type_avis,
+    famille_avis,
+    departement,
+    tribunal,
+    ville,
+    code_postal,
+    {{ normaliser_nom('ville') }} as ville_normalisee,
+    siren,
+    nb_siren,
+    type_personne,
+    jugement_famille,
+    jugement_nature,
+    jugement_date,
+    categorie_vente,
+    categorie_creation,
+    id_avis_precedent,
+    activite
+from {{ source('bodacc', 'annonces') }}
+where date_parution >= {{ debut_historique() }}

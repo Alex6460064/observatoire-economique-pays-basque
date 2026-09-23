@@ -1,0 +1,64 @@
+version: 2
+
+# Couche « raw » : fichiers Parquet écrits par `obs ingerer` dans $OBS_DATA_DIR/raw.
+# Ils sont lus en place par DuckDB (pas de copie dans l'entrepôt).
+
+sources:
+  - name: geo
+    description: "Référentiel communes / EPCI (geo.api.gouv.fr, COG en vigueur au jour de l'extraction)."
+    tables:
+      - name: communes_perimetre
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/geo/communes_perimetre.parquet')"}
+      - name: communes_departements
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/geo/communes_departements.parquet')"}
+
+  - name: naf
+    description: "Nomenclature d'activités française NAF rév. 2 (INSEE)."
+    tables:
+      - name: niveaux
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/naf/naf_niveaux.parquet')"}
+      - name: sections
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/naf/naf_sections.parquet')"}
+      - name: divisions
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/naf/naf_divisions.parquet')"}
+
+  - name: sirene
+    description: "Fichiers stock Sirene (INSEE), extraits sur les départements du périmètre, sans colonne nominative."
+    loaded_at_field: "cast(dateDernierTraitementEtablissement as timestamp)"
+    tables:
+      - name: etablissements
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/sirene/etablissements.parquet')"}
+        # Stock mensuel publié le 1er du mois : alerte si le plus récent traitement
+        # INSEE vu dans nos données date de plus de 45 jours, échec au-delà de 75.
+        freshness:
+          warn_after: {count: 45, period: day}
+          error_after: {count: 75, period: day}
+      - name: unites_legales
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/sirene/unites_legales.parquet')"}
+      - name: liens_succession
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/sirene/liens_succession.parquet')"}
+
+  - name: bodacc
+    description: "Annonces commerciales BODACC (DILA), minimisées à l'ingestion : aucun nom ni adresse."
+    tables:
+      - name: annonces
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/bodacc/annonces_*.parquet', union_by_name = true)"}
+        loaded_at_field: "cast(date_parution as timestamp)"
+        # Parution les jours ouvrés : 4 jours sans annonce = alerte, 10 = échec.
+        freshness:
+          warn_after: {count: 4, period: day}
+          error_after: {count: 10, period: day}
+
+  - name: bmo
+    description: "Enquête Besoins en Main-d'Œuvre (France Travail)."
+    tables:
+      - name: projets
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/bmo/bmo_*.parquet', union_by_name = true)"}
+      - name: bassins_communes
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/bmo/bassins_communes.parquet')"}
+
+  - name: enrichissement
+    description: "Attributions sectorielles produites par Jev (TypeSafe) pour les annonces BODACC sans code NAF. Fichier vide si l'enrichissement n'est pas activé."
+    tables:
+      - name: secteurs_jev
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/enrichissement/secteurs_jev.parquet')"}

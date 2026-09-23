@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: int_bodacc__annonces_valides
+    description: "Annonces BODACC valides (annulations retirées, rectificatifs substitués) et classées par événement."
+    columns:
+      - name: id_annonce
+        data_tests: [unique, not_null]
+      - name: evenement
+        description: >
+          immatriculation | radiation | cession (vente de fonds hors restructurations) |
+          restructuration (fusion, scission, apport) | ouverture_procedure (jugement d'ouverture
+          de sauvegarde, redressement ou liquidation, hors extension) | autre_procedure | transfert_entrant.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [immatriculation, radiation, cession, restructuration, ouverture_procedure, autre_procedure, transfert_entrant]
+      - name: date_evenement
+        description: "Date du jugement pour les procédures collectives (si cohérente), date de parution sinon."
+        data_tests: [not_null]
+
+  - name: int_bodacc__evenements_localises
+    description: "Annonces valides rattachées à une commune (cp + libellé, cp unique, ou siège Sirene) et à un code NAF."
+    columns:
+      - name: id_annonce
+        data_tests: [unique, not_null]
+      - name: methode_localisation
+        data_tests:
+          - accepted_values: {arguments: {values: [cp_ville, cp_unique, sirene_siege, non_localisee]}}
+      - name: source_secteur
+        description: "Origine du secteur : sirene | jev_division | jev_section (attribution Jev, TypeSafe) | non_determine."
+        data_tests:
+          - not_null
+          - accepted_values: {arguments: {values: [sirene, jev_division, jev_section, non_determine]}}
+      - name: code_division
+        data_tests:
+          - not_null
+          - relationships: {arguments: {to: ref('dim_secteurs'), field: code_division}}
+
+  - name: int_sirene__creations_etablissements
+    description: "Établissements du périmètre créés dans la fenêtre d'historique, avec repérage des reprises/transferts."
+    columns:
+      - name: siret
+        data_tests: [unique, not_null]
+      - name: mois
+        data_tests: [not_null]
+
+  - name: int_sirene__creations_entreprises
+    description: "Nouvelles unités légales dont le siège est dans le périmètre."
+    columns:
+      - name: siren
+        data_tests: [unique, not_null]

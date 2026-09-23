@@ -1,0 +1,26 @@
+# Données (hors git : régénérées depuis les sources ; contiennent des identifiants d'entreprises)
+data/
+historique/
+target/
+dbt_packages/
+logs/
+
+# Site : données exportées et page générée depuis docs/methodologie.md
+site/node_modules/
+site/dist/
+site/src/.observablehq/cache/
+site/src/data/
+site/src/methodologie.md
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Environnement local
+.claude/
+.env
+.env.*
+.user.yml
