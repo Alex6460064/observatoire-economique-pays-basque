@@ -5,8 +5,8 @@ date_run,metrique,valeur
 2026-09-23,taux_jointure_sirene,0.9877528149847911
 2026-09-23,taux_localisation,0.9942695679729587
 2026-09-23,taux_localisation_cp_ville,0.9847892679835217
-2026-09-23,taux_secteur_connu_perimetre,0.9315042483505008
-2026-09-23,taux_secteur_jev_perimetre,0.0
+2026-09-23,taux_secteur_connu_perimetre,0.9564722077182323
+2026-09-23,taux_secteur_jev_perimetre,0.024967959367731524
 2026-09-23,taux_secteur_sirene_perimetre,0.9315042483505008
 2026-09-23,taux_siren_present,0.9897010668638428
 2026-09-23,creations_sans_naf,0.0
