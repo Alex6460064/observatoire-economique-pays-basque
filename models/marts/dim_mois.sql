@@ -5,7 +5,7 @@
 --   tardifs : août 2026 compte ~900 créations dans le stock du 01/09 contre ~1 700 un mois
 --   normal). Au-delà : non couvert.
 -- BODACC : le mois courant et les `mois_provisoires_bodacc - 1` précédents sont
---   provisoires (délai entre jugement et parution).
+--   provisoires (délai entre jugement et parution : médiane 7 j, 99e centile 52 j).
 with bornes as (
     select
         date_trunc('month', max(date_dernier_traitement))::date as dernier_mois_sirene,

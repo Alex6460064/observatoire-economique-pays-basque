@@ -67,7 +67,7 @@ ${legendeMensuelle()}
 display(resize((width) => graphiqueMensuel("defaillances", {geo: territoire.code, width})));
 ```
 
-<p class="note">Le mois en cours et le précédent sont provisoires : un jugement est publié au BODACC une à trois semaines après avoir été rendu.</p>
+<p class="note">Les trois derniers mois sont provisoires : un jugement est publié au BODACC en général une à trois semaines après avoir été rendu, parfois bien plus tard.</p>
 
 ## Par secteur d'activité (12 derniers mois consolidés) — ${territoire.nom}
 

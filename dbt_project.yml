@@ -15,7 +15,7 @@ vars:
   debut_historique: "2023-09-01"
   seuil_secret: 5
   mois_provisoires_sirene: 2
-  mois_provisoires_bodacc: 2
+  mois_provisoires_bodacc: 3
   # Seuils qualité bloquants
   taux_min_jointure_bodacc_sirene: 0.90
   taux_min_localisation_bodacc: 0.90

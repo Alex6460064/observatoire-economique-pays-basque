@@ -16,8 +16,9 @@ page « Méthodologie » du site en est une copie générée à chaque exécutio
     derniers mois couverts sont **provisoires** car des établissements sont enregistrés
     avec retard (exemple observé : août 2026 compte ~900 créations dans le stock du
     1er septembre, contre ~1 700 un mois ordinaire). Les mois postérieurs ne sont pas publiés.
-  - BODACC : le mois courant et le précédent sont **provisoires** (délai de publication
-    d'une à trois semaines après le jugement).
+  - BODACC : le mois courant et les deux précédents sont **provisoires**. Délai mesuré entre
+    jugement et parution : 7 jours en médiane, 17 jours pour 95 % des jugements, 52 jours pour
+    99 %. Moins de 1 % des ouvertures viennent encore réviser un mois consolidé.
 - **Comparaisons annuelles** : « 12 derniers mois » = les 12 derniers mois consolidés ;
   comparés aux 12 mois qui les précèdent. Un mois est comparé au même mois de l'année
   précédente, jamais au mois précédent (effets saisonniers).
@@ -146,6 +147,12 @@ site ne publie que des agrégats :
   case est masquée, la plus petite case non nulle du groupe l'est aussi, jusqu'à stabilité ;
 - un contrôle **indépendant** vérifie ces deux propriétés avant chaque publication ;
 - le détail commune × secteur n'est publié qu'en cumul sur 12 mois (plus robuste que par mois).
+
+**Révisions entre deux exécutions.** Un mois consolidé peut encore être révisé par une
+publication tardive (moins de 1 % des ouvertures) ou un enregistrement Sirene tardif. Comparer
+deux versions publiées peut donc révéler qu'un événement s'est ajouté. C'est accepté : cet
+événement est lui-même public (annonce BODACC nominative, ou unité présente avec sa commune dans
+le stock Sirene), et seul le total du territoire, tous secteurs confondus, est historisé.
 
 Limite assumée : l'algorithme de secret secondaire est glouton ; il garantit l'absence de
 recalcul direct dans les relations publiées, sans minimiser le nombre de cases masquées.

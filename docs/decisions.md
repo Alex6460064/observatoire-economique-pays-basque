@@ -113,6 +113,12 @@ cumul 12 mois.
 **Alternatives.** τ-ARGUS (optimal, mais outil Java externe) ; arrondi/bruitage (fausse les
 totaux et les vérifications à la main demandées par le cadrage).
 
+Révisions entre exécutions (revue de code du 23/09/2026) : un mois consolidé peut être révisé
+par une publication tardive, et deux versions publiées peuvent être comparées. Mesure : 1,8 % des
+ouvertures tombaient dans un mois déjà consolidé avec 2 mois provisoires ; porté à 3 mois. Le
+risque résiduel est accepté car l'événement ainsi révélé est lui-même public, et seul le total
+du territoire est historisé.
+
 **Conséquences.** + garantie testée (tests aléatoires sur 200 tableaux croisés) ; les totaux du
 territoire restent tous publiés. − le détail communal mensuel est très masqué pour les petits
 indicateurs (défaillances, cessions) : d'où la carte et les tableaux en cumul 12 mois.

@@ -25,7 +25,8 @@ parametres:
   bmo_bassins_url: "https://statistiques.francetravail.org/bmo/Handlers/HTFile.ashx?MEDIAID=188096"
   # Mois récents considérés comme provisoires (retard d'enregistrement / de publication).
   mois_provisoires_sirene: 2
-  mois_provisoires_bodacc: 2
+  # BODACC : délai jugement -> parution médian 7 j, 99 % sous 52 j (mesuré le 23/09/2026).
+  mois_provisoires_bodacc: 3
 
 sources:
   sirene_dataset: "base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret"
