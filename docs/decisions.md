@@ -56,6 +56,29 @@ les données sont produites par le pipeline puis servies en fichiers statiques.
 (liens validés), rendu complet en ~1 s. − les calculs d'affichage se font dans le navigateur à
 partir d'un CSV de ~1 Mo.
 
+**Addendum (24/09/2026).** Le rendu visuel de Bklit UI est repris sans ses composants : aire en
+dégradé, courbe `monotone-x` (sans dépassement entre deux points, donc sans valeur inventée),
+réticule, grille pointillée et révélation animée, en options Plot et CSS (`graphiques.js`,
+`style.css`). Aucune dépendance n'est ajoutée ; les mois masqués restent des trous.
+
+**Addendum (24/09/2026, direction « Etxe »).** La première refonte a été rejetée, parce qu'elle
+gardait la structure du gabarit (barre latérale, grille de cartes). La direction retenue part des
+maisons du Labourd :
+- **Couleurs.** Blanc de chaux pour le fond, encre du colombage pour le texte et les séries, rouge
+  basque réservé à l'accent (marque, page active, point survolé), vert des volets pour la carte.
+  Thème clair et sombre maison, avec un bouton de bascule mémorisé ; le site suit le système par
+  défaut.
+- **Structure.** Navigation horizontale (`sidebar: false`). L'accueil s'ouvre sur une phrase dont
+  les chiffres forment la typographie, suivie d'un index des indicateurs en lignes. Plus de
+  cartes : les blocs sont séparés par des filets. Les encadrés « Note » d'Observable sont
+  neutralisés.
+- **Mouvement.** Un seul moment animé, à l'accueil : les chiffres comptent et la courbe se trace.
+  Rien d'autre ne bouge sans action du visiteur, et tout est coupé avec `prefers-reduced-motion`.
+- **Police Public Sans** chargée depuis Google Fonts, chiffres tabulaires. Compromis : une requête
+  vers Google par visiteur.
+- **Secret statistique.** Mois et communes masqués en hachures (courbes, carte). Une courbe à 0
+  est un vrai zéro publié. Les axes sont formatés en français.
+
 <a id="adr-0003"></a>
 ## ADR-0003 : lecture distante du stock Sirene et minimisation à l'ingestion
 

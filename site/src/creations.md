@@ -39,7 +39,7 @@ display(resize((width) => graphiqueMensuel(mesure, {geo: territoire.code, width}
 <p class="note">Les pics de janvier viennent d'une convention de date : environ la moitié des créations de janvier sont datées du 1er janvier, surtout des activités immobilières. <a href="./methodologie#creations">Explication</a>.</p>
 
 ```js
-if (territoire.code !== "TOTAL") display(html`<p class="note">À l'échelle d'une commune, les mois comptant moins de ${meta.seuil_secret} créations sont masqués (×). Le cumul sur 12 mois, plus robuste, figure dans le tableau ci-dessous.</p>`);
+if (territoire.code !== "TOTAL") display(html`<p class="note">À l'échelle d'une commune, les mois comptant moins de ${meta.seuil_secret} créations sont masqués (bandes hachurées) ; une courbe à zéro signifie aucune création ce mois-là. Le cumul sur 12 mois, plus robuste, figure dans le tableau ci-dessous.</p>`);
 ```
 
 ## Par secteur d'activité (12 derniers mois consolidés) — ${territoire.nom}

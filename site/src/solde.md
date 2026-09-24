@@ -94,7 +94,7 @@ display(resize((width) => Plot.plot({
 })));
 ```
 
-<p class="note">Bleu : plus d'immatriculations que de radiations ; rouge : l'inverse. Barre absente : l'un des deux flux est masqué (secret statistique). Les trois derniers mois sont provisoires.</p>
+<p class="note">Foncé : plus d'immatriculations que de radiations ; rouge : l'inverse. Barre absente : l'un des deux flux est masqué (secret statistique). Les trois derniers mois sont provisoires.</p>
 
 ## Par commune, 12 derniers mois consolidés
 
