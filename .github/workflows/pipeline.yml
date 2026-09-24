@@ -29,7 +29,7 @@ env:
 
 jobs:
   pipeline:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
@@ -105,7 +105,7 @@ jobs:
     # configuré (Settings > Pages > Source : GitHub Actions).
     if: vars.PUBLIER_PAGES == 'true'
     needs: pipeline
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deploiement.outputs.page_url }}
