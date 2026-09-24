@@ -119,10 +119,15 @@ unités légales. Pour les liens de succession, on garde une seule ligne par (pr
 successeur, date) : celle de l'API, sinon la plus récemment traitée du stock, qui garde
 plusieurs versions d'un même lien. Le complément est reconstruit à chaque run contre le stock
 en place. Sans clé, trois fichiers vides sont écrits et le pipeline se comporte comme en V1.
+Si l'INSEE reste indisponible après les réessais (réseau, 5xx, quota), le run se replie de la
+même façon sur le stock seul, avec un avertissement et l'échec noté au journal. Une clé refusée
+ou une requête invalide (autres 4xx) fait en revanche échouer le run : c'est une erreur de
+configuration, pas une panne.
 
 **Conséquences.** + les mois récents sont plus complets (bab_littoral, 24/09/2026 : août
 278 → 364 créations, juillet 512 → 537), et le mois courant devient visible, marqué provisoire.
-− un secret à gérer, et environ 2 min d'appels par run à cause du quota. − le statut des mois
+− un secret à gérer, et environ 4 min 30 d'appels par run à cause du quota (CI, CAPB,
+24/09/2026). − le statut des mois
 (`dim_mois`) dépend du traitement le plus récent observé, donc de la présence de la clé. Sans
 elle, le calendrier recule d'un mois. − les établissements créés avant la fenêtre et modifiés
 depuis le stock ne sont pas rafraîchis. Aucun indicateur ne les utilise aujourd'hui.

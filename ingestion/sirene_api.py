@@ -23,6 +23,7 @@ import shutil
 import time
 from collections.abc import Iterator
 from datetime import date
+from pathlib import Path
 from typing import Any
 
 import duckdb
@@ -164,29 +165,26 @@ def dernier_traitement_stock(cfg: Config) -> date:
     return maxi.date()
 
 
-def ingerer_sirene_api(cfg: Config, journal: Journal, departements: set[str]) -> None:
-    dest = cfg.raw / "sirene_api"
-    cle = os.environ.get("INSEE_API_KEY")
-    if not cle:
-        # Un complément d'un run précédent ne doit pas survivre à un stock plus récent ; les
-        # fichiers vides gardent les sources dbt lisibles.
-        shutil.rmtree(dest, ignore_errors=True)
-        ecrire_parquet([], dest / "etablissements.parquet", COLONNES_ETABLISSEMENT)
-        ecrire_parquet([], dest / "unites_legales.parquet", COLONNES_UNITE_LEGALE)
-        ecrire_parquet([], dest / "liens_succession.parquet", COLONNES_LIEN_SUCCESSION)
-        log.warning("INSEE_API_KEY absente : complément API Sirene ignoré (stock mensuel seul)")
-        return
-
-    client = ClientSirene(cfg.sources["sirene_api"], cle, cfg.p["sirene_api_requetes_minute"])
-    depuis = dernier_traitement_stock(cfg)
-    millesime = depuis.isoformat()
-    # Les trois fichiers vont ensemble : écrits dans un dossier temporaire, publiés d'un
-    # bloc. Un échec en cours de route supprime aussi l'ancien complément, qui ne
-    # correspondrait plus au stock.
+def _complement_vide(dest: Path) -> None:
+    """Fichiers vides au schéma du stock : les sources dbt restent lisibles, le stock seul compte."""
     shutil.rmtree(dest, ignore_errors=True)
-    tmp = dest.with_name("sirene_api.part")
-    shutil.rmtree(tmp, ignore_errors=True)
+    ecrire_parquet([], dest / "etablissements.parquet", COLONNES_ETABLISSEMENT)
+    ecrire_parquet([], dest / "unites_legales.parquet", COLONNES_UNITE_LEGALE)
+    ecrire_parquet([], dest / "liens_succession.parquet", COLONNES_LIEN_SUCCESSION)
 
+
+def _indisponible(exc: httpx.HTTPError) -> bool:
+    """Panne INSEE persistante après réessais (réseau, 5xx, quota). Les autres 4xx (clé
+    refusée, requête invalide) sont une erreur de notre côté : elles doivent faire échouer le run."""
+    if isinstance(exc, httpx.HTTPStatusError):
+        return exc.response.status_code == 429 or exc.response.status_code >= 500
+    return isinstance(exc, httpx.TransportError)
+
+
+def _extraire(
+    cfg: Config, journal: Journal, client: ClientSirene, departements: set[str], depuis: date, tmp: Path
+) -> None:
+    millesime = depuis.isoformat()
     with journal.extraction("sirene_api_etablissements", url=client.api, millesime=millesime) as e:
         q = requete_etablissements(departements, depuis, cfg.debut_historique)
         etabs = [
@@ -216,4 +214,33 @@ def ingerer_sirene_api(cfg: Config, journal: Journal, departements: set[str]) ->
         )
         e.lignes = ecrire_parquet(liens, tmp / "liens_succession.parquet", COLONNES_LIEN_SUCCESSION)
     log.info("API Sirene : %s liens de succession", e.lignes)
+
+
+def ingerer_sirene_api(cfg: Config, journal: Journal, departements: set[str]) -> None:
+    dest = cfg.raw / "sirene_api"
+    cle = os.environ.get("INSEE_API_KEY")
+    if not cle:
+        # Un complément d'un run précédent ne doit pas survivre à un stock plus récent.
+        _complement_vide(dest)
+        log.warning("INSEE_API_KEY absente : complément API Sirene ignoré (stock mensuel seul)")
+        return
+
+    client = ClientSirene(cfg.sources["sirene_api"], cle, cfg.p["sirene_api_requetes_minute"])
+    depuis = dernier_traitement_stock(cfg)
+    # Les trois fichiers vont ensemble : écrits dans un dossier temporaire, publiés d'un
+    # bloc. Un échec en cours de route supprime aussi l'ancien complément, qui ne
+    # correspondrait plus au stock.
+    shutil.rmtree(dest, ignore_errors=True)
+    tmp = dest.with_name("sirene_api.part")
+    shutil.rmtree(tmp, ignore_errors=True)
+    try:
+        _extraire(cfg, journal, client, departements, depuis, tmp)
+    except httpx.HTTPError as exc:
+        if not _indisponible(exc):
+            raise
+        # Repli sur le stock seul : chiffres exacts mais moins frais ; l'échec reste au journal.
+        shutil.rmtree(tmp, ignore_errors=True)
+        _complement_vide(dest)
+        log.warning("API Sirene indisponible (%s) : stock mensuel seul pour ce run", exc)
+        return
     tmp.rename(dest)

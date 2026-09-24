@@ -229,6 +229,24 @@ def test_ingerer_ecrit_les_trois_fichiers_au_schema_du_stock(cfg, monkeypatch):
 
 
 @respx.mock
+@pytest.mark.parametrize("reponse", [httpx.Response(503), httpx.Response(429), httpx.ConnectError("insee injoignable")])
+def test_ingerer_api_indisponible_revient_au_stock_seul(cfg, monkeypatch, reponse):
+    monkeypatch.setenv("INSEE_API_KEY", "cle-test")
+    monkeypatch.setitem(cfg.sources, "sirene_api", API)
+    respx.get(f"{API}/siret").mock(return_value=httpx.Response(200, json=page("etablissements", [ETAB])))
+    respx.get(f"{API}/siren").mock(side_effect=reponse)
+
+    ingerer_sirene_api(cfg, Journal(cfg.journal_path), {"64"})
+
+    dest = cfg.raw / "sirene_api"
+    for f in ("etablissements", "unites_legales", "liens_succession"):
+        assert duckdb.sql(f"select count(*) from '{(dest / f).as_posix()}.parquet'").fetchall() == [(0,)]
+    assert not dest.with_name("sirene_api.part").exists()
+    statuts = [(e["source"], e["statut"]) for e in Journal(cfg.journal_path).lire()]
+    assert statuts == [("sirene_api_etablissements", "ok"), ("sirene_api_unites_legales", "echec")]
+
+
+@respx.mock
 def test_ingerer_echec_partiel_ne_laisse_aucun_complement(cfg, monkeypatch):
     monkeypatch.setenv("INSEE_API_KEY", "cle-test")
     monkeypatch.setitem(cfg.sources, "sirene_api", API)

@@ -91,7 +91,7 @@ Commandes utiles :
 uv run obs --perimetre bab_littoral run   # sous-périmètre de 10 communes (développement)
 uv run obs ingerer --source bodacc        # une source seulement
 uv run obs run --forcer                   # ignore les caches, relit tout depuis les sources
-uv run pytest                             # 73 tests unitaires, sans réseau
+uv run pytest                             # 76 tests unitaires, sans réseau
 uv run obs evaluer-jev --n 300            # évaluation de l'attribution sectorielle (clé TypeSafe)
 uv run obs documenter                     # régénère docs/dictionnaire.md
 ```

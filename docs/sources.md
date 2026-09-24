@@ -62,7 +62,9 @@
 - Minimisation : paramètre `champs` limité aux colonnes du stock, sans nom ni adresse. La
   période en cours (`dateFin` nulle) donne l'état et l'activité, comme dans le stock.
 - Réponse 404 = aucun résultat. Quota : pause de `60 / sirene_api_requetes_minute` secondes
-  entre deux requêtes, les 429 sont réessayés.
+  entre deux requêtes, les 429 sont réessayés. Environ 4 min 30 par run (CI, 24/09/2026).
+- Panne persistante (réseau, 5xx, 429 après réessais) : repli sur le stock seul pour le run.
+  Clé refusée ou autre 4xx : le run échoue.
 - Fusion en staging : la version API l'emporte sur celle du stock (par siret, par siren,
   par lien).
 

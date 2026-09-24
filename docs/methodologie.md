@@ -164,7 +164,8 @@ recalcul direct dans les relations publiées, sans minimiser le nombre de cases 
 
 - Localisation BODACC : l'adresse de l'annonce est celle du siège pour une société ; une
   entreprise immatriculée hors du département mais active dans le territoire n'est pas vue.
-- Sirene reflète les déclarations administratives, parfois tardives ou erronées (34 dates
-  de création postérieures à la date d'extraction ont été détectées et écartées).
+- Sirene reflète les déclarations administratives, parfois tardives ou erronées : les dates de
+  création postérieures à la date du run sont écartées (34 avec le stock seul, 117 avec le
+  complément API, CAPB, 24/09/2026).
 - Le secteur NAF des radiations est inconnu pour ~13 % d'entre elles (unités anciennes codées
   dans une nomenclature antérieure) ; l'IA en rattrape une partie.
