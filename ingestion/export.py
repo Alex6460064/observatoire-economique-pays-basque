@@ -82,11 +82,23 @@ def cellules_publiques(indicateur: str, cube: Cube, provisoires: set[str]) -> li
     return sorted(out, key=lambda r: (r["type_periode"], r["periode"], r["geo"], r["niveau_secteur"], r["secteur"]))
 
 
+def vider_dossier(dest: Path) -> None:
+    """Vide `dest` sans supprimer le dossier lui-même.
+
+    Sous Windows, supprimer le dossier échoue s'il est surveillé (serveur de dev) ou marqué en
+    lecture seule par OneDrive ; son contenu, lui, reste supprimable.
+    """
+    dest.mkdir(parents=True, exist_ok=True)
+    for enfant in dest.iterdir():
+        if enfant.is_dir() and not enfant.is_symlink():
+            shutil.rmtree(enfant)
+        else:
+            enfant.unlink()
+
+
 def exporter(cfg: Config) -> None:
     dest = cfg.export_dir
-    if dest.exists():
-        shutil.rmtree(dest)
-    dest.mkdir(parents=True)
+    vider_dossier(dest)
     seuil = cfg.p["seuil_secret"]
     con = duckdb.connect(str(cfg.warehouse), read_only=True)
     try:
