@@ -1,12 +1,16 @@
 import zipfile
 
 import duckdb
+import httpx
 import pytest
+import respx
 from openpyxl import Workbook
+from socle_territorial import http
 from socle_territorial.bmo import lire_bassins, lire_bmo
-from socle_territorial.geo import normaliser_nom, simplifier
+from socle_territorial.geo import normaliser_nom, simplifier, valider_departements
 from socle_territorial.journal import Journal
 from socle_territorial.stockage import ecrire_parquet
+from tenacity import stop_after_attempt
 
 
 @pytest.mark.parametrize(
@@ -223,3 +227,27 @@ def test_simplifier_garde_un_anneau_valide():
     }
     (f,) = simplifier(fc, tolerance=1)["features"]
     assert len(f["geometry"]["coordinates"][0][0]) >= 4
+
+
+def test_valider_departements_trie_et_accepte_corse_et_outre_mer():
+    assert valider_departements({"64", "2A", "974", "40"}) == ["2A", "40", "64", "974"]
+
+
+@pytest.mark.parametrize("code", ["64' or 1=1 --", "6", "64 ", "2C", ""])
+def test_valider_departements_refuse_un_code_anormal(code):
+    with pytest.raises(ValueError, match="département invalides"):
+        valider_departements({"64", code})
+
+
+def _flux_coupe():
+    yield b"debut"
+    raise httpx.ReadError("coupure")
+
+
+@respx.mock
+def test_download_supprime_le_fichier_partiel_en_cas_d_echec(tmp_path):
+    respx.get("https://source.test/f.zip").mock(return_value=httpx.Response(200, content=_flux_coupe()))
+    dest = tmp_path / "f.zip"
+    with pytest.raises(httpx.ReadError):
+        http.download.retry_with(stop=stop_after_attempt(1))("https://source.test/f.zip", dest)
+    assert list(tmp_path.iterdir()) == []

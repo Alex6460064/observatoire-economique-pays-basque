@@ -19,7 +19,7 @@ from datetime import date
 from pathlib import Path
 
 import duckdb
-from socle_territorial import http
+from socle_territorial import geo, http
 from socle_territorial.journal import Journal
 
 from ingestion.config import Config
@@ -84,7 +84,7 @@ def ingerer_sirene(cfg: Config, journal: Journal, departements: set[str], forcer
     deja = json.loads(version_path.read_text(encoding="utf-8")) if version_path.exists() else {}
     fichiers_ok = all((dest / f"{k}.parquet").exists() for k in stocks)
     meme_version = all(deja.get(k, {}).get("url") == v["url"] for k, v in stocks.items())
-    deps = sorted(departements)
+    deps = geo.valider_departements(departements)
     if meme_version and fichiers_ok and deja.get("departements") == deps and not forcer:
         with journal.extraction("sirene", millesime=stocks["etablissements"]["millesime"]) as e:
             e.details = {"inchange": True}

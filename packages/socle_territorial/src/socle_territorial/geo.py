@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections.abc import Iterable
 from typing import Any
 
 from socle_territorial import http
@@ -34,6 +35,18 @@ def _aplatir(c: dict[str, Any]) -> dict[str, Any]:
         "population": c.get("population"),
         "codes_postaux": sorted(c.get("codesPostaux") or []),
     }
+
+
+_CODE_DEPARTEMENT = re.compile(r"\d{2,3}|2[AB]")
+
+
+def valider_departements(codes: Iterable[str]) -> list[str]:
+    """Codes triés, vérifiés avant insertion dans une requête (SQL DuckDB, ODSQL du BODACC)."""
+    deps = sorted(codes)
+    invalides = [d for d in deps if not _CODE_DEPARTEMENT.fullmatch(d)]
+    if invalides:
+        raise ValueError(f"Codes département invalides : {invalides}")
+    return deps
 
 
 def epci(code_epci: str) -> dict[str, Any]:

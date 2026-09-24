@@ -2,6 +2,7 @@ import json
 from datetime import date
 
 import httpx
+import pytest
 import respx
 
 from ingestion.bodacc import aplatir, extraire_mois, id_avis_precedent, mois_a_extraire, sirens
@@ -126,3 +127,8 @@ def test_extraire_mois_reessaie_sur_erreur_serveur(monkeypatch):
     )
     assert extraire_mois("https://api.test", date(2026, 9, 1), {"64"}) == []
     assert route.call_count == 2
+
+
+def test_extraire_mois_refuse_un_code_departement_anormal():
+    with pytest.raises(ValueError, match="département invalides"):
+        extraire_mois("https://api.test", date(2026, 9, 1), {"64') or ('1'='1"})

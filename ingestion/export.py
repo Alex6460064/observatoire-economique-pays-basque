@@ -48,8 +48,8 @@ def _ecrire_csv(path: Path, lignes: list[dict[str, Any]], colonnes: list[str]) -
         w.writerows(lignes)
 
 
-def _requete(con: duckdb.DuckDBPyConnection, sql: str) -> list[dict[str, Any]]:
-    cur = con.execute(sql)
+def _requete(con: duckdb.DuckDBPyConnection, sql: str, params: list[Any] | None = None) -> list[dict[str, Any]]:
+    cur = con.execute(sql, params)
     cols = [d[0] for d in cur.description]
     return [dict(zip(cols, r, strict=True)) for r in cur.fetchall()]
 
@@ -110,8 +110,9 @@ def exporter(cfg: Config) -> None:
                 Evenement(**r)
                 for r in _requete(
                     con,
-                    f"""select mois, code_commune, code_section, code_division, detail, valeur
-                        from marts.fct_evenements_mensuels where indicateur = '{ind}'""",
+                    """select mois, code_commune, code_section, code_division, detail, valeur
+                        from marts.fct_evenements_mensuels where indicateur = ?""",
+                    [ind],
                 )
             ]
             cube = construire_cube(

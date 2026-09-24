@@ -62,12 +62,16 @@ def download(url: str, dest: Path) -> str:
     dest.parent.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(dest.suffix + ".part")
     sha = hashlib.sha256()
-    with client() as c, c.stream("GET", url) as r:
-        r.raise_for_status()
-        with tmp.open("wb") as f:
-            for chunk in r.iter_bytes(chunk_size=1 << 20):
-                sha.update(chunk)
-                f.write(chunk)
+    try:
+        with client() as c, c.stream("GET", url) as r:
+            r.raise_for_status()
+            with tmp.open("wb") as f:
+                for chunk in r.iter_bytes(chunk_size=1 << 20):
+                    sha.update(chunk)
+                    f.write(chunk)
+    except BaseException:
+        tmp.unlink(missing_ok=True)
+        raise
     tmp.replace(dest)
     log.info("téléchargé %s -> %s", url, dest)
     return sha.hexdigest()

@@ -1,11 +1,12 @@
 from datetime import date
 
+import duckdb
 import pytest
 from socle_territorial.secret import verifier_secret
 
 from ingestion.config import premier_du_mois
 from ingestion.cubes import TOTAL, Evenement, construire_cube, fenetres, secretiser
-from ingestion.export import cellules_publiques
+from ingestion.export import _requete, cellules_publiques
 
 MOIS = [premier_du_mois(date(2024, 1, 1), i) for i in range(30)]  # 2024-01 .. 2026-06
 COMMUNES = ["64102", "64024", "64008"]
@@ -84,3 +85,10 @@ def test_types_de_procedure_somment_au_total():
 def test_secteur_inconnu_refuse():
     with pytest.raises(ValueError, match="hors référentiel"):
         construire_cube([_ev(MOIS[0], "64102", "Q", "86", 5)], MOIS, MOIS, COMMUNES, SECTIONS, DIVISIONS)
+
+
+def test_requete_parametree_traite_la_valeur_comme_une_donnee():
+    con = duckdb.connect()
+    con.execute("create table t as select * from (values ('a', 1), ('b''c', 2)) v(indicateur, valeur)")
+    assert _requete(con, "select valeur from t where indicateur = ?", ["b'c"]) == [{"valeur": 2}]
+    assert _requete(con, "select valeur from t where indicateur = ?", ["a' or '1'='1"]) == []

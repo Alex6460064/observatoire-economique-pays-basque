@@ -18,7 +18,7 @@ import re
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
-from socle_territorial import http
+from socle_territorial import geo, http
 from socle_territorial.journal import Journal
 from socle_territorial.stockage import ecrire_parquet
 
@@ -168,7 +168,7 @@ def mois_a_extraire(
 
 def extraire_mois(api: str, mois: date, departements: set[str]) -> list[dict[str, Any]]:
     fin = premier_du_mois(mois, 1)
-    deps = ", ".join(f"'{d}'" for d in sorted(departements))
+    deps = ", ".join(f"'{d}'" for d in geo.valider_departements(departements))
     fams = ", ".join(f"'{f}'" for f in FAMILLES)
     where = (
         f"numerodepartement in ({deps}) and familleavis in ({fams}) "
