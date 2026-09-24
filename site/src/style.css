@@ -21,7 +21,7 @@
   --serie-3: var(--berde);
   --serie-n1: #b7bbb7;
   --negatif: var(--gorri);
-  --provisoire: rgba(128, 135, 139, 0.10);
+  --provisoire: rgba(128, 135, 139, 0.18);
   --masque: rgba(82, 89, 94, 0.38);
   --axe: #c3c6c2;
   --grille: rgba(128, 135, 139, 0.28);
@@ -41,7 +41,7 @@
     --gorri: #e2676c;
     --berde: #72b596;
     --serie-n1: #515b60;
-    --provisoire: rgba(173, 179, 182, 0.08);
+    --provisoire: rgba(173, 179, 182, 0.14);
     --masque: rgba(173, 179, 182, 0.32);
     --axe: #3a4449;
     --grille: rgba(126, 135, 139, 0.24);
@@ -60,7 +60,7 @@
   --gorri: #e2676c;
   --berde: #72b596;
   --serie-n1: #515b60;
-  --provisoire: rgba(173, 179, 182, 0.08);
+  --provisoire: rgba(173, 179, 182, 0.14);
   --masque: rgba(173, 179, 182, 0.32);
   --axe: #3a4449;
   --grille: rgba(126, 135, 139, 0.24);
@@ -296,12 +296,13 @@ body, #observablehq-header { transition: background-color 200ms ease, color 200m
  * Rien d'autre ne bouge sans action du visiteur.
  */
 @media (prefers-reduced-motion: no-preference) {
-  .trace g[aria-label="line"] path {
+  .trace g[aria-label="line"]:not(.segment-provisoire) path {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
     animation: tracer 1600ms cubic-bezier(0.65, 0, 0.35, 1) 250ms forwards;
   }
-  .trace g[aria-label="area"] path { opacity: 0; animation: apparaitre 700ms ease 1300ms forwards; }
+  .trace g[aria-label="area"] path,
+  .trace g.segment-provisoire path { opacity: 0; animation: apparaitre 700ms ease 1300ms forwards; }
 }
 @keyframes tracer { to { stroke-dashoffset: 0; } }
 @keyframes apparaitre { to { opacity: 1; } }

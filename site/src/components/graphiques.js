@@ -93,6 +93,11 @@ export function graphiqueMensuel(ind, {geo = "TOTAL", niv = "T", sect = "", widt
   const s = serieMensuelle(ind, geo, niv, sect);
   const masques = s.filter((d) => d.v == null);
   const provisoires = s.filter((d) => d.provisoire);
+  // Mois provisoires incomplets : tracés en pointillés depuis le dernier mois consolidé, sans
+  // aire, pour que leur baisse ne se lise pas comme une tendance.
+  const iProv = s.findIndex((d) => d.provisoire);
+  const consolides = iProv < 0 ? s : s.slice(0, iProv);
+  const recents = iProv < 0 ? [] : s.slice(Math.max(0, iProv - 1));
   // Mois publiés entourés de mois masqués : sans point, ils seraient invisibles.
   const isoles = s.filter((d, i) => d.v != null && s[i - 1]?.v == null && s[i + 1]?.v == null);
   const id = ++identifiants;
@@ -120,10 +125,32 @@ export function graphiqueMensuel(ind, {geo = "TOTAL", niv = "T", sect = "", widt
             fill: "var(--provisoire)"
           })
         : null,
+      provisoires.length
+        ? Plot.text([moisSuivant(provisoires.at(-1).date)], {
+            x: (d) => d,
+            text: () => "provisoire",
+            frameAnchor: "top",
+            textAnchor: "end",
+            dx: -4,
+            dy: 4,
+            fontSize: 11,
+            fill: "var(--encre-3)"
+          })
+        : null,
       Plot.rectX(masques, {x1: "date", x2: (d) => moisSuivant(d.date), fill: `url(#hachure-${id})`}),
-      Plot.areaY(s, {x: "date", y: "v", fill: `url(#degrade-${id})`, curve: "monotone-x"}),
+      Plot.areaY(consolides, {x: "date", y: "v", fill: `url(#degrade-${id})`, curve: "monotone-x"}),
       Plot.lineY(s, {x: "date", y: "n1", stroke: COULEUR_N1, strokeWidth: 2, curve: "monotone-x"}),
-      Plot.lineY(s, {x: "date", y: "v", stroke: COULEUR, strokeWidth: 2, curve: "monotone-x"}),
+      Plot.lineY(consolides, {x: "date", y: "v", stroke: COULEUR, strokeWidth: 2, curve: "monotone-x"}),
+      Plot.lineY(recents, {
+        x: "date",
+        y: "v",
+        stroke: COULEUR,
+        strokeWidth: 2,
+        strokeOpacity: 0.55,
+        strokeDasharray: "4 3",
+        curve: "monotone-x",
+        className: "segment-provisoire"
+      }),
       Plot.dot(isoles, {x: "date", y: "v", r: 2.5, fill: COULEUR}),
       Plot.ruleY([0], {stroke: "var(--axe)"}),
       Plot.ruleX(s, Plot.pointerX({x: "date", stroke: "var(--reticule)", strokeWidth: 1})),
@@ -158,7 +185,9 @@ export function graphiqueMensuel(ind, {geo = "TOTAL", niv = "T", sect = "", widt
     ]
   });
   // pathLength normalisé : l'animation CSS du tracé ne dépend pas de la longueur de la courbe.
-  if (trace) for (const p of graphique.querySelectorAll('g[aria-label="line"] path')) p.setAttribute("pathLength", "1");
+  if (trace)
+    for (const p of graphique.querySelectorAll('g[aria-label="line"]:not(.segment-provisoire) path'))
+      p.setAttribute("pathLength", "1");
   return graphique;
 }
 
@@ -166,7 +195,7 @@ export function legendeMensuelle() {
   return html`<div class="legende">
     <span><i style="background:var(--serie-1)"></i>mois courant</span>
     <span><i style="background:var(--serie-n1)"></i>même mois un an avant</span>
-    <span><i class="zone"></i>mois provisoires</span>
+    <span><i class="zone"></i>mois provisoires (incomplets, en pointillés)</span>
     <span><i class="hachure"></i>mois masqué (secret statistique)</span>
   </div>`;
 }
