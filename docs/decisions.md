@@ -7,7 +7,7 @@ Format : ADR léger (Michael Nygard). Toutes les décisions datent du 23/09/2026
 | [0001](#adr-0001) | Python + DuckDB + Parquet, modélisation avec dbt-duckdb |
 | [0002](#adr-0002) | Tableau de bord statique avec Observable Framework |
 | [0003](#adr-0003) | Lecture distante du stock Sirene et minimisation à l'ingestion |
-| [0004](#adr-0004) | Pas d'API Sirene en V1 |
+| [0004](#adr-0004) | API Sirene en complément optionnel du stock (révisée le 24/09/2026) |
 | [0005](#adr-0005) | Recalcul depuis les sources + historique agrégé versionné |
 | [0006](#adr-0006) | Secret statistique : seuil 5, suppression secondaire vérifiée |
 | [0007](#adr-0007) | Localisation BODACC par code postal + libellé, secteur via Sirene |
@@ -95,16 +95,37 @@ data.gouv.fr (requêtes Range) ; un changement de titre de ressource fait échou
 (volontairement, plutôt que de lire un mauvais fichier).
 
 <a id="adr-0004"></a>
-## ADR-0004 : pas d'API Sirene en V1
+## ADR-0004 : API Sirene en complément optionnel du stock
 
-**Contexte.** L'API Sirene demande une authentification et impose un quota ; elle apporte la
-fraîcheur quotidienne.
+*Révisée le 24/09/2026. Décision initiale (V1) : pas d'API Sirene, stock mensuel seul.*
 
-**Décision.** V1 sans API Sirene : indicateurs de créations **mensuels** fondés sur le stock
-mensuel ; le BODACC (quotidien) couvre les événements récents.
+**Contexte.** Le stock mensuel s'arrête au dernier traitement du mois précédent : les créations
+des dernières semaines manquent ou sont très incomplètes (enregistrements tardifs). L'API
+Sirene 3.11 donne ces données au jour le jour, mais elle demande une clé du portail INSEE
+et limite le débit (30 requêtes/min sur le plan « Accès public »).
 
-**Conséquences.** + aucun secret obligatoire, pas de gestion de quota. − les créations du mois
-écoulé n'apparaissent qu'au stock suivant (mois marqués provisoires). Extension possible en V2.
+**Décision.** Le stock reste la base. Quand `INSEE_API_KEY` est définie, chaque run complète
+le stock par l'API :
+- les établissements des départements du périmètre **traités** depuis le dernier traitement
+  du stock et **créés** dans la fenêtre d'historique. Filtrer sur la seule date de création
+  ferait manquer les enregistrements tardifs ;
+- les unités légales et les liens de succession de ces établissements ;
+- le paramètre `champs` limite la réponse aux colonnes du stock, sans nom ni adresse ;
+- une requête toutes les `60 / sirene_api_requetes_minute` secondes ; les 429 sont réessayés.
+
+Les fichiers ont le schéma du stock (`raw/sirene_api/`) et sont fusionnés en staging. La
+version API, plus récente, l'emporte : par siret pour les établissements, par siren pour les
+unités légales. Pour les liens de succession, on garde une seule ligne par (prédécesseur,
+successeur, date) : celle de l'API, sinon la plus récemment traitée du stock, qui garde
+plusieurs versions d'un même lien. Le complément est reconstruit à chaque run contre le stock
+en place. Sans clé, trois fichiers vides sont écrits et le pipeline se comporte comme en V1.
+
+**Conséquences.** + les mois récents sont plus complets (bab_littoral, 24/09/2026 : août
+278 → 364 créations, juillet 512 → 537), et le mois courant devient visible, marqué provisoire.
+− un secret à gérer, et environ 2 min d'appels par run à cause du quota. − le statut des mois
+(`dim_mois`) dépend du traitement le plus récent observé, donc de la présence de la clé. Sans
+elle, le calendrier recule d'un mois. − les établissements créés avant la fenêtre et modifiés
+depuis le stock ne sont pas rafraîchis. Aucun indicateur ne les utilise aujourd'hui.
 
 <a id="adr-0005"></a>
 ## ADR-0005 : recalcul depuis les sources + historique agrégé versionné

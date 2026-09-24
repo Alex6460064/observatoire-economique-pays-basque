@@ -1,3 +1,20 @@
+-- Stock mensuel complété par l'API Sirene : la version API, plus récente, l'emporte par siret.
+with api as (
+    select * from {{ source('sirene_api', 'etablissements') }}
+),
+
+stock as (
+    select s.*
+    from {{ source('sirene', 'etablissements') }} as s
+    where not exists (select 1 from api as a where a.siret = s.siret)
+),
+
+fusion as (
+    select * from api
+    union all by name
+    select * from stock
+)
+
 select
     siret,
     siren,
@@ -18,4 +35,4 @@ select
     activitePrincipaleNAF25Etablissement as code_naf25,
     caractereEmployeurEtablissement = 'O' as est_employeur,
     cast(dateDernierTraitementEtablissement as timestamp) as date_dernier_traitement
-from {{ source('sirene', 'etablissements') }}
+from fusion

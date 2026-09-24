@@ -135,7 +135,7 @@ Sous-classes NAF rév. 2 avec division et section (libellés INSEE).
 
 ### `staging.stg_sirene__etablissements`
 
-Établissements Sirene des départements du périmètre (sans colonne nominative ni adresse).
+Établissements Sirene des départements du périmètre (sans colonne nominative ni adresse). Stock mensuel complété par l'API Sirene, dont la version l'emporte.
 
 | Colonne | Type | Description |
 |---|---|---|
@@ -157,7 +157,7 @@ Sous-classes NAF rév. 2 avec division et section (libellés INSEE).
 
 ### `staging.stg_sirene__liens_succession`
 
-Liens de succession entre établissements (transferts, reprises) dont le successeur est dans le périmètre départemental.
+Liens de succession entre établissements (transferts, reprises) dont le successeur est dans le périmètre départemental. Une ligne par lien : version API, sinon la plus récemment traitée du stock.
 
 | Colonne | Type | Description |
 |---|---|---|
@@ -169,7 +169,7 @@ Liens de succession entre établissements (transferts, reprises) dont le success
 
 ### `staging.stg_sirene__unites_legales`
 
-Unités légales Sirene ayant au moins un établissement dans les départements du périmètre.
+Unités légales Sirene ayant au moins un établissement dans les départements du périmètre. Stock mensuel complété par l'API Sirene, dont la version l'emporte.
 
 | Colonne | Type | Description |
 |---|---|---|

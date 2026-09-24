@@ -12,10 +12,13 @@ page « Méthodologie » du site en est une copie générée à chaque exécutio
   les sources (pas d'accumulation fragile : Sirene conserve les établissements fermés, le
   BODACC est interrogeable depuis 2008).
 - **Mois provisoires** :
-  - Sirene : le stock mensuel couvre jusqu'au dernier mois traité par l'INSEE. Les deux
-    derniers mois couverts sont **provisoires** car des établissements sont enregistrés
-    avec retard (exemple observé : août 2026 compte ~900 créations dans le stock du
-    1er septembre, contre ~1 700 un mois ordinaire). Les mois postérieurs ne sont pas publiés.
+  - Sirene : les données couvrent jusqu'au mois du traitement INSEE le plus récent observé.
+    C'est le mois courant quand l'API Sirene complète le stock ([ADR-0004](decisions.md#adr-0004)),
+    sinon le mois qui précède le dernier stock mensuel. Les deux derniers mois couverts sont
+    **provisoires** car des établissements sont enregistrés avec retard (exemple observé :
+    août 2026 compte ~900 créations dans le stock du 1er septembre, contre ~1 700 un mois
+    ordinaire). Avec l'API, le mois courant est donc publié incomplet et marqué provisoire. Les
+    mois postérieurs ne sont pas publiés.
   - BODACC : le mois courant et les deux précédents sont **provisoires**. Délai mesuré entre
     jugement et parution : 7 jours en médiane, 17 jours pour 95 % des jugements, 52 jours pour
     99 %. Moins de 1 % des ouvertures viennent encore réviser un mois consolidé.
@@ -29,8 +32,8 @@ page « Méthodologie » du site en est une copie générée à chaque exécutio
 **Créations d'établissements.** Nombre d'établissements dont la *date de création* tombe dans
 le mois, situés dans une commune du territoire, **hors transferts et reprises** : un nouveau
 SIRET issu d'un transfert ou d'une reprise avec continuité économique (repéré par le fichier
-des liens de succession Sirene, `continuiteEconomique = true`) n'est pas une création. Cette
-correction retire environ un nouveau SIRET sur cinq.
+des liens de succession Sirene, `continuiteEconomique = true`, dans leur version la plus
+récente) n'est pas une création. Cette correction retire environ un nouveau SIRET sur cinq.
 
 **Créations d'entreprises.** Nombre de nouvelles unités légales (nouveau SIREN) dont le siège
 est situé dans le territoire, hors sièges issus d'une reprise avec continuité économique.

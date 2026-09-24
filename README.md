@@ -38,7 +38,7 @@ Quelques résultats obtenus en construisant le projet, et documentés :
 ```mermaid
 flowchart LR
   subgraph Sources officielles
-    S[Sirene stock<br/>Parquet INSEE]
+    S[Sirene stock<br/>Parquet INSEE<br/>+ API optionnelle]
     B[BODACC<br/>API DILA]
     M[Enquête BMO<br/>France Travail]
     G[geo.api.gouv.fr<br/>+ NAF INSEE]
@@ -48,7 +48,7 @@ flowchart LR
   end
   subgraph "Transformation (dbt-duckdb)"
     R[(raw<br/>Parquet)] --> ST[staging] --> IN[intermediate] --> MA[marts]
-    T{{75 tests<br/>+ fraîcheur}}
+    T{{78 tests<br/>+ fraîcheur}}
   end
   J[Jev · TypeSafe<br/>secteur des annonces<br/>sans NAF]
   E[obs exporter<br/>secret statistique<br/>vérifié]
@@ -91,13 +91,14 @@ Commandes utiles :
 uv run obs --perimetre bab_littoral run   # sous-périmètre de 10 communes (développement)
 uv run obs ingerer --source bodacc        # une source seulement
 uv run obs run --forcer                   # ignore les caches, relit tout depuis les sources
-uv run pytest                             # 52 tests unitaires, sans réseau
+uv run pytest                             # 73 tests unitaires, sans réseau
 uv run obs evaluer-jev --n 300            # évaluation de l'attribution sectorielle (clé TypeSafe)
 uv run obs documenter                     # régénère docs/dictionnaire.md
 ```
 
 Variables d'environnement : `OBS_DATA_DIR` (données, défaut `./data`), `OBS_PERIMETRE`,
-`TYPESAFE_API_KEY` (optionnelle : sans elle, l'attribution sectorielle par IA est ignorée).
+`TYPESAFE_API_KEY` (optionnelle : sans elle, l'attribution sectorielle par IA est ignorée),
+`INSEE_API_KEY` (optionnelle : sans elle, pas de complément API au stock Sirene mensuel).
 
 > Windows : si les chemins longs sont désactivés, placez le dépôt et `OBS_DATA_DIR` dans un chemin
 > court (DuckDB, Python et Node échouent au-delà de 260 caractères).
@@ -125,7 +126,8 @@ alternatives sont argumentés dans [docs/decisions.md](docs/decisions.md).
 ## Limites connues
 
 - La commune d'une annonce BODACC est celle du siège pour une société.
-- Les créations du dernier mois dépendent du stock Sirene mensuel (pas d'API Sirene en V1).
+- Sans `INSEE_API_KEY`, les créations du dernier mois dépendent du stock Sirene mensuel. Avec
+  la clé, le mois courant est publié, incomplet et marqué provisoire.
 - Le détail par commune et par mois est souvent masqué pour les petits indicateurs : il est
   proposé en cumul sur 12 mois.
 - Chiffres non comparables aux créations d'entreprises publiées par l'INSEE (définitions

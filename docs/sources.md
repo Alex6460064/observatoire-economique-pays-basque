@@ -13,6 +13,7 @@
 | BMO (France Travail) | xlsx/zip data.gouv.fr | 314 à 430 lignes/an (dép. 64) | code bassin | annuelle (avril) | Licence Ouverte (`fr-lo`) |
 | Zonage bassins BMO | xlsx statistiques.francetravail.org | 34 990 communes | code commune | annuelle | idem BMO |
 | NAF rév. 2 (INSEE) | xls insee.fr | 732 sous-classes, 88 divisions, 21 sections | code NAF | stable | Licence Ouverte 2.0 |
+| API Sirene 3.11 (INSEE) | API, clé du portail (optionnelle), 30 requêtes/min | 2 663 établissements, 2 465 unités légales, 676 liens (dép. 64, traités du 31/08 au 24/09/2026) | SIRET, SIREN | quotidienne | Licence Ouverte 2.0 |
 | Jev (TypeSafe) | API, clé (optionnelle) | ~800 annonces classées au 1er run | — | à la demande | service tiers |
 
 ## Points « à vérifier » du cadrage : réponses
@@ -21,7 +22,7 @@
 |---|---|
 | Code SIREN de l'EPCI et nombre de communes | **200067106**, « CA du Pays Basque », **158 communes** (geo.api.gouv.fr, 23/09/2026). |
 | Formats du stock Sirene | CSV zippé **et Parquet** ; Parquet retenu (StockEtablissement 2,2 Go, StockUniteLegale 709 Mo). |
-| Limite d'appels de l'API Sirene | **Non utilisée en V1** (voir ADR-0004) : le stock mensuel suffit à des indicateurs mensuels, et le BODACC couvre le quotidien. Pas de secret ni de quota à gérer. |
+| Limite d'appels de l'API Sirene | **30 requêtes/min** par clé, plan « Accès public » du portail INSEE (vu le 24/09/2026). Utilisée depuis le 24/09/2026 en complément optionnel du stock ([ADR-0004](decisions.md#adr-0004)). |
 | Licence BMO | `fr-lo` sur data.gouv.fr = Licence Ouverte. |
 | Statut de diffusion partielle Sirene | Champ `statutDiffusionEtablissement` / `statutDiffusionUniteLegale`, valeurs `O` (diffusible) et `P` (partielle). Pour `P`, l'INSEE masque l'adresse (`codePostalEtablissement = "[ND]"`) mais **conserve le code commune et l'activité**. Règle retenue : compter en agrégat, ne jamais afficher d'unité. 13 % du stock, ~30 % des créations récentes. |
 
@@ -46,7 +47,24 @@
   date en l'an 8 ; établissements du dernier mois très incomplets (enregistrement tardif).
 - **Transferts/reprises** : `StockEtablissementLiensSuccession` (`continuiteEconomique`) permet
   d'exclure les nouveaux SIRET qui ne sont pas des créations (~21 % des nouveaux SIRET du périmètre).
-- API Sirene (INSEE) : non utilisée en V1.
+- **Liens de succession** : le stock garde plusieurs versions d'un même lien (prédécesseur,
+  successeur, date) quand l'INSEE le retraite (10 cas sur 120 869 au stock de septembre 2026 ;
+  `transfertSiege` peut changer d'une version à l'autre). Seule la plus récente est retenue.
+
+## API Sirene 3.11 (complément du stock)
+
+- Optionnelle : `INSEE_API_KEY` (en-tête `X-INSEE-Api-Key-Integration`). Sans clé, le
+  complément est vide et seul le stock est utilisé ([ADR-0004](decisions.md#adr-0004)).
+- Recherche multicritères `/siret` : communes des départements du périmètre, établissements
+  traités depuis le dernier traitement du stock et créés dans la fenêtre d'historique.
+  Pagination par curseur (1 000 lignes/page). Unités légales (`/siren`) et liens
+  (`/siret/liensSuccession`) demandés ensuite par lots de 100 identifiants.
+- Minimisation : paramètre `champs` limité aux colonnes du stock, sans nom ni adresse. La
+  période en cours (`dateFin` nulle) donne l'état et l'activité, comme dans le stock.
+- Réponse 404 = aucun résultat. Quota : pause de `60 / sirene_api_requetes_minute` secondes
+  entre deux requêtes, les 429 sont réessayés.
+- Fusion en staging : la version API l'emporte sur celle du stock (par siret, par siren,
+  par lien).
 
 ## BODACC
 

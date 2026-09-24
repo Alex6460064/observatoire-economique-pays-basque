@@ -60,6 +60,7 @@ jobs:
       - name: Ingestion, transformation, contrôles, enrichissement, export
         env:
           TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+          INSEE_API_KEY: ${{ secrets.INSEE_API_KEY }}
         run: uv run obs run ${{ inputs.forcer && '--forcer' || '' }}
 
       - uses: actions/setup-node@v7

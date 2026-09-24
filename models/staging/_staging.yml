@@ -32,7 +32,7 @@ models:
         data_tests: [not_null]
 
   - name: stg_sirene__etablissements
-    description: "Établissements Sirene des départements du périmètre (sans colonne nominative ni adresse)."
+    description: "Établissements Sirene des départements du périmètre (sans colonne nominative ni adresse). Stock mensuel complété par l'API Sirene, dont la version l'emporte."
     columns:
       - name: siret
         description: "Identifiant de l'établissement (14 chiffres). Usage interne uniquement, jamais publié."
@@ -48,13 +48,21 @@ models:
         description: "Code commune INSEE de l'établissement."
 
   - name: stg_sirene__unites_legales
-    description: "Unités légales Sirene ayant au moins un établissement dans les départements du périmètre."
+    description: "Unités légales Sirene ayant au moins un établissement dans les départements du périmètre. Stock mensuel complété par l'API Sirene, dont la version l'emporte."
     columns:
       - name: siren
         data_tests: [unique, not_null]
 
   - name: stg_sirene__liens_succession
-    description: "Liens de succession entre établissements (transferts, reprises) dont le successeur est dans le périmètre départemental."
+    description: "Liens de succession entre établissements (transferts, reprises) dont le successeur est dans le périmètre départemental. Une ligne par lien : version API, sinon la plus récemment traitée du stock."
+    data_tests:
+      - unique:
+          arguments: {column_name: "concat_ws('|', siret_predecesseur, siret_successeur, date_lien)"}
+    columns:
+      - name: siret_predecesseur
+        data_tests: [not_null]
+      - name: siret_successeur
+        data_tests: [not_null]
 
   - name: stg_bodacc__annonces
     description: "Annonces BODACC minimisées (aucun nom, aucune adresse), fenêtre d'historique."

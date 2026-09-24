@@ -38,6 +38,16 @@ sources:
       - name: liens_succession
         meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/sirene/liens_succession.parquet')"}
 
+  - name: sirene_api
+    description: "Complément API Sirene 3.11 : enregistrements traités depuis le stock, même schéma. Fichiers vides sans INSEE_API_KEY (ADR-0004)."
+    tables:
+      - name: etablissements
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/sirene_api/etablissements.parquet')"}
+      - name: unites_legales
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/sirene_api/unites_legales.parquet')"}
+      - name: liens_succession
+        meta: {external_location: "read_parquet('{{ env_var('OBS_DATA_DIR', 'data') }}/raw/sirene_api/liens_succession.parquet')"}
+
   - name: bodacc
     description: "Annonces commerciales BODACC (DILA), minimisées à l'ingestion : aucun nom ni adresse."
     tables:

@@ -1,6 +1,7 @@
 -- Calendrier des mois publiés et statut de consolidation par famille de source.
 --
--- Sirene : le stock couvre jusqu'au mois du dernier traitement INSEE observé ; les
+-- Sirene : les données couvrent jusqu'au mois du dernier traitement INSEE observé, le mois
+--   courant quand l'API complète le stock (ADR-0004, choix du 24/09/2026) ; les
 --   `mois_provisoires_sirene` derniers mois couverts sont incomplets (enregistrements
 --   tardifs : août 2026 compte ~900 créations dans le stock du 01/09 contre ~1 700 un mois
 --   normal). Au-delà : non couvert.

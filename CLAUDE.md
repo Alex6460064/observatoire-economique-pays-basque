@@ -108,7 +108,7 @@ uv run dbt parse --project-dir . --profiles-dir .   # validation SQL/YAML sans d
 cd site && npm run dev                    # http://127.0.0.1:3000
 ```
 
-Variables : `OBS_DATA_DIR` (défaut `./data`), `OBS_PERIMETRE`, `TYPESAFE_API_KEY` (optionnelle).
+Variables : `OBS_DATA_DIR` (défaut `./data`), `OBS_PERIMETRE`, `TYPESAFE_API_KEY`, `INSEE_API_KEY` (optionnelles).
 Windows : chemins courts (limite 260 caractères pour DuckDB/Python/Node).
 
 ## Organisation
