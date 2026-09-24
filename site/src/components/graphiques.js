@@ -278,7 +278,13 @@ export function barresSecteurs(ind, {geo = "TOTAL", niv = "S", max = 25} = {}) {
 export function carteCommunes(ind, {width} = {}) {
   const [precedente, fin] = fenetres(ind);
   const valeurs = new Map(parCommune(ind, fin, precedente).map((d) => [d.code, d]));
-  const connus = [...valeurs.values()].filter((d) => d.pour1000 != null);
+  // Classes calculées sur les seules communes ayant au moins un événement : les zéros, très
+  // majoritaires pour les petits indicateurs, écrasaient sinon tous les seuils à 0.
+  const positifs = [...valeurs.values()].filter((d) => d.pour1000 > 0);
+  const pour1000Positif = (f) => {
+    const t = valeurs.get(f.properties.code)?.pour1000;
+    return t > 0 ? t : null;
+  };
   const hauteur = Math.min(560, Math.round(width * 0.78));
   const id = ++identifiants;
   const titre = (f) => {
@@ -296,17 +302,23 @@ ${
       type: "quantile",
       n: 5,
       range: ["#dfe7f0", "#b3c6da", "#83a2c2", "#5579a3", "#2f5378"],
-      domain: connus.map((d) => d.pour1000),
+      domain: positifs.map((d) => d.pour1000),
       label: `pour 1 000 habitants (${libelleFenetre(fin)})`,
-      legend: true,
-      tickFormat: (d) => d.toLocaleString("fr-FR", {maximumFractionDigits: 1})
+      legend: positifs.length > 0,
+      // 2 décimales : avec peu de communes, deux seuils voisins s'affichaient identiques à 1 décimale.
+      tickFormat: (d) => d.toLocaleString("fr-FR", {maximumFractionDigits: 2})
     },
     marks: [
       () => svg`<defs><pattern id=${`hachure-carte-${id}`} width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
         <rect width="1.5" height="5" style="fill:var(--masque)" />
       </pattern></defs>`,
+      Plot.geo(contours.features.filter((f) => valeurs.get(f.properties.code)?.v === 0), {
+        fill: "var(--surface)",
+        stroke: "var(--axe)",
+        strokeWidth: 0.6
+      }),
       Plot.geo(contours.features, {
-        fill: (f) => valeurs.get(f.properties.code)?.pour1000 ?? null,
+        fill: pour1000Positif,
         stroke: "var(--theme-background)",
         strokeWidth: 0.6
       }),
@@ -318,7 +330,7 @@ ${
       Plot.tip(contours.features, Plot.pointer(Plot.geoCentroid({title: titre, fill: "var(--surface)", stroke: "var(--bord)"})))
     ]
   });
-  return html`<div>${carte}<p class="note">Hachuré : commune sous secret statistique (moins de ${meta.seuil_secret} événements, ou valeur masquée pour empêcher un recalcul). Survolez une commune pour le détail.</p></div>`;
+  return html`<div>${carte}<p class="note">Blanc : aucun événement sur 12 mois. Hachuré : commune sous secret statistique (moins de ${meta.seuil_secret} événements, ou valeur masquée pour empêcher un recalcul). Survolez une commune pour le détail.</p></div>`;
 }
 
 /** Pied de page obligatoire : chaque source citée avec millésime et date d'extraction. */
