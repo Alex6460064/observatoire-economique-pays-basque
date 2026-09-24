@@ -30,7 +30,7 @@ SOURCES = ("geo", "naf", "sirene", "bodacc", "bmo")
 
 
 def ingerer(cfg: Config, sources: list[str], forcer: bool) -> None:
-    from ingestion import bmo, bodacc, referentiels, sirene
+    from ingestion import bmo, bodacc, referentiels, sirene, sirene_api
 
     journal = Journal(cfg.journal_path)
     perimetre_json = cfg.raw / "geo" / "perimetre.json"
@@ -44,6 +44,7 @@ def ingerer(cfg: Config, sources: list[str], forcer: bool) -> None:
         referentiels.ingerer_naf(cfg, journal)
     if "sirene" in sources:
         sirene.ingerer_sirene(cfg, journal, departements, forcer)
+        sirene_api.ingerer_sirene_api(cfg, journal, departements)
     if "bodacc" in sources:
         bodacc.ingerer_bodacc(cfg, journal, departements, forcer)
     if "bmo" in sources:

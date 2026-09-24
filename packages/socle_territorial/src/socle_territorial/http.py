@@ -45,9 +45,9 @@ def client() -> httpx.Client:
 
 
 @_retry
-def get_json(url: str, params: dict[str, Any] | None = None) -> Any:
+def get_json(url: str, params: dict[str, Any] | None = None, headers: dict[str, str] | None = None) -> Any:
     with client() as c:
-        r = c.get(url, params=params)
+        r = c.get(url, params=params, headers=headers)
         r.raise_for_status()
         return r.json()
 

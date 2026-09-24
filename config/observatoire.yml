@@ -27,9 +27,13 @@ parametres:
   mois_provisoires_sirene: 2
   # BODACC : délai jugement -> parution médian 7 j, 99 % sous 52 j (mesuré le 23/09/2026).
   mois_provisoires_bodacc: 3
+  # API Sirene, plan « Accès public » du portail INSEE : 30 requêtes/min par clé (vu le 24/09/2026).
+  sirene_api_requetes_minute: 30
 
 sources:
   sirene_dataset: "base-sirene-des-entreprises-et-de-leurs-etablissements-siren-siret"
+  # Complément récent au stock mensuel (optionnel : ignoré sans INSEE_API_KEY). Voir ADR-0004.
+  sirene_api: "https://api.insee.fr/api-sirene/3.11"
   bodacc_api: "https://bodacc-datadila.opendatasoft.com/api/explore/v2.1/catalog/datasets/annonces-commerciales"
   naf_niveaux: "https://www.insee.fr/fr/statistiques/fichier/2120875/naf2008_5_niveaux.xls"
   naf_sections: "https://www.insee.fr/fr/statistiques/fichier/2120875/naf2008_liste_n1.xls"
