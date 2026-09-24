@@ -1,7 +1,7 @@
 // Sélecteurs et tableau par commune partagés par les pages thématiques.
 import * as Inputs from "npm:@observablehq/inputs";
 import {html} from "npm:htl";
-import {communes, fenetres, libelleFenetre, nombre, parCommune, pourcent} from "./donnees.js";
+import {communes, fenetres, nombre, parCommune, pourcent} from "./donnees.js";
 
 export function choixTerritoire() {
   const options = [
@@ -22,8 +22,8 @@ export function tableauCommunes(ind) {
       columns: ["commune", "v", "n1", "evolution", "pour1000"],
       header: {
         commune: "Commune",
-        v: `12 mois (${libelleFenetre(fin)})`,
-        n1: "12 mois précédents",
+        v: "12 mois",
+        n1: "12 mois avant",
         evolution: "Évolution",
         pour1000: "Pour 1 000 hab."
       },

@@ -234,3 +234,22 @@ dépendance vers le code propre à l'observatoire ; tests dédiés.
 
 **Conséquences.** + réutilisable tel quel (`uv add --editable ../piste5/packages/socle_territorial`
 ou publication ultérieure). − une frontière à maintenir entre générique et spécifique.
+
+<a id="adr-0011"></a>
+## ADR-0011 : interface « clair épuré », contrôles dans le panneau qu'ils pilotent
+
+**Contexte.** Le site était jugé peu lisible : contrôles éloignés des graphiques qu'ils modifient
+(le choix Établissements/Entreprises changeait des graphiques plus bas, pas les tuiles voisines),
+libellés de secteurs tronqués ou débordants dans les barres Plot, style « journal » (filets, aucun
+arrondi) peu propice à regrouper un graphique et ses réglages.
+
+**Décision.** Remplace la direction « Etxe » (addendum de l'ADR-0002). Chaque bloc est un panneau (`panneau()`) avec titre, badges de portée (territoire,
+période) et contenu, qui changent ensemble. Les tuiles chiffre-clé servent d'onglets (`onglets()`)
+et suivent le territoire choisi. Les barres horizontales sont en HTML (`barres()`) : libellé
+au-dessus de la barre, jamais tronqué. Palette : fond gris clair, séries bleu ardoise, rouge
+basque réservé à l'état actif ; police Geist (Google Fonts), chiffres tabulaires. Les cases masquées
+restent affichées « secret » ou hachurées, jamais comme des zéros.
+
+**Conséquences.** + contrôle et effet visibles ensemble, mobile sans défilement horizontal.
+− la carte et le tableau par commune restent sur tout le territoire (badge « Toutes les
+communes ») : le filtre territoire ne s'y applique pas.

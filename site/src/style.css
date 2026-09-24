@@ -1,160 +1,160 @@
 @import url("observablehq:default.css");
 
 /*
- * Direction « Etxe » : les couleurs des maisons du Labourd. Blanc de chaux pour le fond,
- * encre du colombage pour le texte et les séries, rouge basque réservé à l'accent (marque,
- * page active, point survolé), vert des volets pour la carte.
+ * Direction « clair épuré » : la donnée d'abord. Fond gris très léger, panneaux blancs,
+ * séries en bleu ardoise, rouge basque réservé à l'état actif (page, onglet, point survolé).
+ * Chaque contrôle vit dans le panneau qu'il pilote (voir docs/decisions.md).
  * Le mode suit le système, sauf choix explicite (data-theme, bouton de l'en-tête).
  */
 :root {
-  --chaux: #fbfbf9;
-  --chaux-2: #f1f2ef;
-  --encre: #1e2326;
-  --encre-2: #52595e;
-  --encre-3: #80878b;
-  --trait: #dcdedb;
-  --gorri: #9e1b22;
-  --berde: #2c5e4a;
+  --fond: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #eef0f3;
+  --texte: #14171c;
+  --texte-2: #525a66;
+  --texte-3: #858d99;
+  --bord: #e4e7eb;
+  --accent: #b3262d;
+  --ardoise: #33577c;
 
-  --serie-1: var(--encre);
-  --serie-2: var(--gorri);
-  --serie-3: var(--berde);
-  --serie-n1: #b7bbb7;
-  --negatif: var(--gorri);
-  --provisoire: rgba(128, 135, 139, 0.18);
-  --masque: rgba(82, 89, 94, 0.38);
-  --axe: #c3c6c2;
-  --grille: rgba(128, 135, 139, 0.28);
-  --reticule: var(--encre-3);
-  --hausse: #2c5e4a;
-  --baisse: #9e1b22;
+  --serie-1: var(--ardoise);
+  --serie-2: var(--accent);
+  --serie-3: #2f6b52;
+  --serie-n1: #c3c9d1;
+  --negatif: var(--accent);
+  --provisoire: rgba(133, 141, 153, 0.12);
+  --masque: rgba(82, 90, 102, 0.35);
+  --axe: #cfd4da;
+  --grille: rgba(133, 141, 153, 0.22);
+  --reticule: var(--texte-3);
+  --hausse: #2f6b52;
+  --baisse: var(--accent);
+  --rayon: 14px;
+  --ombre: 0 1px 2px rgba(20, 23, 28, 0.04);
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --chaux: #151b1f;
-    --chaux-2: #1c2429;
-    --encre: #e8e9e5;
-    --encre-2: #adb3b6;
-    --encre-3: #7e878b;
-    --trait: #2d363b;
-    --gorri: #e2676c;
-    --berde: #72b596;
-    --serie-n1: #515b60;
-    --provisoire: rgba(173, 179, 182, 0.14);
-    --masque: rgba(173, 179, 182, 0.32);
-    --axe: #3a4449;
-    --grille: rgba(126, 135, 139, 0.24);
-    --hausse: #72b596;
-    --baisse: #e2676c;
+    --fond: #0e1115;
+    --surface: #161a20;
+    --surface-2: #1e232b;
+    --texte: #e8ebef;
+    --texte-2: #a6aeb9;
+    --texte-3: #768090;
+    --bord: #262c35;
+    --accent: #e46a70;
+    --ardoise: #8fb3d9;
+    --serie-3: #74b898;
+    --serie-n1: #47505c;
+    --provisoire: rgba(166, 174, 185, 0.08);
+    --masque: rgba(166, 174, 185, 0.3);
+    --axe: #333a45;
+    --grille: rgba(118, 128, 144, 0.2);
+    --hausse: #74b898;
+    --ombre: none;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --chaux: #151b1f;
-  --chaux-2: #1c2429;
-  --encre: #e8e9e5;
-  --encre-2: #adb3b6;
-  --encre-3: #7e878b;
-  --trait: #2d363b;
-  --gorri: #e2676c;
-  --berde: #72b596;
-  --serie-n1: #515b60;
-  --provisoire: rgba(173, 179, 182, 0.14);
-  --masque: rgba(173, 179, 182, 0.32);
-  --axe: #3a4449;
-  --grille: rgba(126, 135, 139, 0.24);
-  --hausse: #72b596;
-  --baisse: #e2676c;
+  --fond: #0e1115;
+  --surface: #161a20;
+  --surface-2: #1e232b;
+  --texte: #e8ebef;
+  --texte-2: #a6aeb9;
+  --texte-3: #768090;
+  --bord: #262c35;
+  --accent: #e46a70;
+  --ardoise: #8fb3d9;
+  --serie-3: #74b898;
+  --serie-n1: #47505c;
+  --provisoire: rgba(166, 174, 185, 0.08);
+  --masque: rgba(166, 174, 185, 0.3);
+  --axe: #333a45;
+  --grille: rgba(118, 128, 144, 0.2);
+  --hausse: #74b898;
+  --ombre: none;
   color-scheme: dark;
 }
 
 /* Variables attendues par Observable Framework. */
 :root {
-  --theme-foreground: var(--encre);
-  --theme-foreground-alt: var(--encre);
-  --theme-foreground-muted: var(--encre-2);
-  --theme-foreground-faint: var(--encre-3);
-  --theme-foreground-fainter: var(--encre-3);
-  --theme-foreground-faintest: var(--trait);
-  --theme-foreground-focus: var(--gorri);
-  --theme-background: var(--chaux);
-  --theme-background-a: var(--chaux);
-  --theme-background-b: var(--chaux-2);
-  --theme-background-alt: var(--chaux-2);
-  --sans-serif: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --theme-foreground: var(--texte);
+  --theme-foreground-alt: var(--texte);
+  --theme-foreground-muted: var(--texte-2);
+  --theme-foreground-faint: var(--texte-3);
+  --theme-foreground-fainter: var(--texte-3);
+  --theme-foreground-faintest: var(--bord);
+  --theme-foreground-focus: var(--accent);
+  --theme-background: var(--surface);
+  --theme-background-a: var(--surface);
+  --theme-background-b: var(--surface-2);
+  --theme-background-alt: var(--surface-2);
+  --sans-serif: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
   --serif: var(--sans-serif);
-  --observablehq-max-width: 1180px;
-  --observablehq-header-height: 3.25rem;
+  --monospace: var(--sans-serif);
+  --observablehq-max-width: 1120px;
+  --observablehq-header-height: 3.5rem;
 }
 
-html, body { background: var(--chaux); }
+html, body { background: var(--fond); }
 body, #observablehq-main {
   font-family: var(--sans-serif);
-  color: var(--encre);
+  font-size: 15px;
+  color: var(--texte);
   -webkit-font-smoothing: antialiased;
 }
-body, #observablehq-header { transition: background-color 200ms ease, color 200ms ease; }
-.big, table, .evolution, .indice-valeur, .phrase-chiffre { font-variant-numeric: tabular-nums; }
+.big, table, .evolution, .barres-valeur { font-variant-numeric: tabular-nums; }
+:is(a, button, select, input, [tabindex]):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* En-tête : marque, rubriques, thème. */
+/* En-tête : marque, rubriques en pastilles, thème. */
 #observablehq-header {
-  gap: 2rem;
-  padding-top: 0.75rem;
-  background: var(--chaux);
-  border-bottom: 1px solid var(--trait);
+  gap: 1.5rem;
+  padding-top: 0.6rem;
+  background: color-mix(in srgb, var(--fond) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--bord);
   font: 500 14px var(--sans-serif);
 }
-.marque {
+#observablehq-header a.marque {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
   flex-shrink: 0;
-  color: var(--encre);
-  font-weight: 700;
+  color: var(--texte);
+  font-weight: 600;
   text-decoration: none;
 }
-.marque-signe { width: 10px; height: 18px; background: var(--gorri); }
+.marque-signe { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
 .nav-principale {
   display: flex;
-  gap: 1.35rem;
+  gap: 0.15rem;
   flex: 1;
   overflow-x: auto;
   scrollbar-width: none;
 }
 .nav-principale a {
-  position: relative;
-  padding: 0.5rem 0;
-  color: var(--encre-2);
+  padding: 0.4rem 0.75rem;
+  border-radius: 999px;
+  color: var(--texte-2);
   text-decoration: none;
   white-space: nowrap;
-  transition: color 150ms ease;
+  transition: color 120ms ease, background-color 120ms ease;
 }
-.nav-principale a:hover { color: var(--encre); }
-.nav-principale a[aria-current="page"] { color: var(--encre); }
-.nav-principale a[aria-current="page"]::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background: var(--gorri);
-}
+.nav-principale a:hover { color: var(--texte); background: var(--surface-2); }
+.nav-principale a[aria-current="page"] { color: var(--texte); background: var(--surface); box-shadow: inset 0 0 0 1px var(--bord); }
 .bascule-theme {
   display: inline-grid;
   place-items: center;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border: 1px solid var(--trait);
-  border-radius: 50%;
-  background: transparent;
-  color: var(--encre-2);
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--bord);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--texte-2);
   cursor: pointer;
-  transition: color 150ms ease, border-color 150ms ease;
 }
-.bascule-theme:hover { color: var(--encre); border-color: var(--encre-3); }
+.bascule-theme:hover { color: var(--texte); }
 .bascule-theme svg { width: 16px; height: 16px; }
 .bascule-theme .icone-lune { display: none; }
 :root[data-theme="dark"] .bascule-theme .icone-lune { display: block; }
@@ -163,172 +163,226 @@ body, #observablehq-header { transition: background-color 200ms ease, color 200m
   :root:not([data-theme="light"]) .bascule-theme .icone-lune { display: block; }
   :root:not([data-theme="light"]) .bascule-theme .icone-soleil { display: none; }
 }
-:is(a, button, select, input):focus-visible { outline: 2px solid var(--gorri); outline-offset: 3px; }
 
-/* Typographie. */
+/* Typographie : une famille, une échelle courte. */
 #observablehq-main h1 {
-  font-size: clamp(2rem, 4.4vw, 3rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-  max-width: 20ch;
-  margin: 1rem 0 1.25rem;
+  font-size: clamp(1.75rem, 3.6vw, 2.4rem);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  max-width: 28ch;
+  margin: 1.75rem 0 0.75rem;
 }
-#observablehq-main > h2, #observablehq-main > .observablehq > h2 {
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  margin-top: 3.5rem;
+#observablehq-main h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+  margin: 2.5rem 0 0.75rem;
 }
 #observablehq-main :is(h1, h2, h3) a[href^="#"] { color: inherit; text-decoration: none; }
-#observablehq-main p, #observablehq-main li { line-height: 1.6; max-width: 70ch; }
-#observablehq-main a { color: var(--encre); text-decoration-color: var(--gorri); text-underline-offset: 0.2em; }
-#observablehq-main a:hover { color: var(--gorri); }
+#observablehq-main p, #observablehq-main li { line-height: 1.6; max-width: 72ch; }
+#observablehq-main a { color: var(--texte); text-decoration-color: var(--texte-3); text-underline-offset: 0.2em; }
+#observablehq-main a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+.chapeau { color: var(--texte-2); font-size: 1rem; }
 
-/* Pas de cartes : un bloc est séparé par un filet, pas par une boîte. */
-.card {
-  background: none;
-  border: 0;
-  border-top: 1px solid var(--trait);
-  border-radius: 0;
-  padding: 1.1rem 0 0;
-  box-shadow: none;
+/*
+ * Panneau : un graphique ou un tableau avec son titre, la portée de ses données et ses
+ * contrôles. Ce qui est dans le panneau change ensemble.
+ */
+.panneau {
+  margin: 1rem 0;
+  padding: 1.1rem 1.25rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre);
+  min-width: 0;
 }
-#observablehq-main .card h2 { font-size: 0.95rem; font-weight: 600; margin: 0 0 0.75rem; letter-spacing: 0; }
-
-/* Chiffres-clés des pages : le nombre d'abord, puis ce qu'il compte. */
-.tuile { display: flex; flex-direction: column; gap: 0.25rem; text-decoration: none; }
-#observablehq-main a.tuile { color: inherit; text-decoration: none; }
-#observablehq-main .tuile h2 { order: 2; font-size: 0.95rem; font-weight: 600; margin: 0; color: var(--encre); }
-.tuile .big { order: 1; font-size: 2.6rem; font-weight: 800; letter-spacing: -0.035em; line-height: 1; color: var(--encre); }
-.tuile .muted { order: 3; font-size: 0.85rem; color: var(--encre-3); }
-.tuile .evolution { order: 4; }
-.tuile .sparkline { order: 5; }
-.evolution { font-size: 0.85rem; font-weight: 600; color: var(--encre-2); }
-.sparkline { display: block; width: 100%; height: auto; margin-top: 0.5rem; }
-
-/* Accueil : la phrase-chiffres, puis la courbe, puis l'index des indicateurs. */
-.phrase {
-  margin: 1.5rem 0 1rem;
-  font-size: clamp(1.35rem, 2.9vw, 2.1rem);
-  font-weight: 400;
-  line-height: 1.3;
-  letter-spacing: -0.012em;
-  color: var(--encre-2);
+.panneau > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  margin-bottom: 0.75rem;
 }
-.phrase p { margin: 0; max-width: none !important; line-height: inherit !important; }
-.phrase .ligne { display: grid; grid-template-columns: 6.2ch 1fr; column-gap: 0.6em; align-items: baseline; }
-.phrase-chiffre { font-weight: 800; color: var(--encre); letter-spacing: -0.03em; text-align: right; }
-.phrase a { color: inherit !important; text-decoration: none; }
-.phrase a:hover .phrase-texte { color: var(--encre); }
-.phrase-texte { transition: color 150ms ease; }
-.accueil-graphique { margin: 1.5rem 0 3rem; }
-.accueil-graphique .legende { margin-bottom: 0.25rem; }
-
-.indice { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--encre); }
-.indice li { max-width: none !important; border-bottom: 1px solid var(--trait); }
-.indice a {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) 7rem 7.5rem minmax(0, 1.4fr);
+#observablehq-main .panneau h2 { margin: 0; font-size: 1rem; }
+.portee {
+  display: inline-flex;
   align-items: center;
-  gap: 1.5rem;
-  padding: 0.95rem 0.25rem;
-  color: var(--encre) !important;
-  text-decoration: none;
-  transition: background-color 150ms ease;
+  gap: 0.35rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--texte-2);
+  font-size: 0.8rem;
+  white-space: nowrap;
 }
-.indice a:hover { background: var(--chaux-2); }
-.indice-nom { font-weight: 600; }
-.indice-nom small { display: block; font-weight: 400; font-size: 0.82rem; color: var(--encre-3); }
-.indice-valeur { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; text-align: right; }
-.indice .evolution { text-align: right; }
-.indice .sparkline { margin: 0; }
+.panneau > :last-child { margin-bottom: 0; }
+.panneau .note:last-child { margin-bottom: 0; }
+.grille-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.grille-2 > .panneau { margin: 0; }
+.grille-carte { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); align-items: start; }
+
+/* Barre de filtre de la page : le territoire choisi s'applique aux panneaux qui l'affichent. */
+.filtres {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 1.25rem 0 1rem;
+}
+
+/* Tuiles chiffre-clé ; en onglets, elles pilotent les panneaux qui suivent. */
+.tuiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.tuile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 1rem 1.15rem 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  box-shadow: var(--ombre);
+  color: var(--texte);
+  font: inherit;
+  text-align: left;
+  min-width: 0;
+}
+#observablehq-main a.tuile { color: var(--texte); text-decoration: none; }
+a.tuile, button.tuile { cursor: pointer; transition: border-color 120ms ease, box-shadow 120ms ease; }
+a.tuile:hover, button.tuile:hover { border-color: var(--texte-3); }
+button.tuile[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.tuile-nom { font-size: 0.9rem; font-weight: 500; color: var(--texte-2); }
+.tuile .big { font-size: 2.1rem; font-weight: 650; letter-spacing: -0.03em; line-height: 1.1; color: var(--texte); }
+.tuile .muted { font-size: 0.8rem; color: var(--texte-3); }
+.evolution { font-size: 0.85rem; font-weight: 500; color: var(--texte-2); }
+.sparkline { display: block; width: 100%; height: auto; margin-top: 0.5rem; }
+.secret { color: var(--texte-3); font-weight: 500; }
+.tuile .big.secret { font-size: 1.3rem; }
+.onglets-aide { margin: -0.4rem 0 0; font-size: 0.8rem; color: var(--texte-3); }
+
+/* Barres horizontales en HTML : libellé au-dessus de la barre, jamais tronqué. */
+#observablehq-main .barres { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.7rem; max-width: none; }
+.barres li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.25rem 1rem;
+  max-width: none !important;
+  line-height: 1.3 !important;
+}
+.barres-libelle { font-size: 0.875rem; color: var(--texte); overflow-wrap: anywhere; }
+.barres-valeur { font-size: 0.875rem; font-weight: 600; text-align: right; }
+.barres-piste { grid-column: 1 / -1; position: relative; height: 8px; border-radius: 4px; background: var(--surface-2); }
+.barres-piste i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: var(--serie-1); }
+.barres-piste i.fantome { background: var(--serie-n1); top: -2px; bottom: -2px; opacity: 0.8; }
+.barres-piste i.fantome + i { top: 1px; bottom: 1px; }
+
+/* Accueil : grille des indicateurs. */
+.indice { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 1rem 0; }
 
 /* Légendes, notes, sources. */
 .legende {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem 1.2rem;
-  font-size: 0.82rem;
-  color: var(--encre-2);
-  margin: 0.25rem 0 0.75rem;
+  gap: 0.35rem 1.1rem;
+  font-size: 0.8rem;
+  color: var(--texte-2);
+  margin: 0 0 0.5rem;
 }
-.legende i { display: inline-block; width: 16px; height: 2px; vertical-align: middle; margin-right: 0.4rem; }
+.legende i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 0.4rem; }
 .legende i.zone { height: 12px; background: var(--provisoire); border: 1px solid var(--axe); }
+.legende i.pointille { height: 0; border-top: 2px dashed var(--serie-1); opacity: 0.6; }
 .legende i.hachure {
   height: 12px;
   border: 1px solid var(--axe);
   background: repeating-linear-gradient(135deg, var(--masque) 0 1.5px, transparent 1.5px 5px);
 }
-.note, .avertissement { font-size: 0.9rem; color: var(--encre-2); max-width: 70ch; }
-.avertissement { border-left: 3px solid var(--gorri); padding: 0.2rem 0 0.2rem 1rem; color: var(--encre); }
-.sources {
-  margin-top: 4rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--trait);
-  font-size: 0.82rem;
-  color: var(--encre-3);
-  max-width: 90ch;
-}
-.sources ul { padding-left: 1.1rem; margin: 0.4rem 0; }
-.statut-ok { color: var(--hausse); font-weight: 600; }
-.statut-alerte { color: var(--gorri); font-weight: 600; }
-.statut-echec { color: var(--baisse); font-weight: 600; }
-
-/* Champs (Inputs). */
-#observablehq-main form select, #observablehq-main form input[type="text"] {
-  min-height: 36px;
-  border: 1px solid var(--trait);
-  border-radius: 4px;
-  background: var(--chaux);
-  color: var(--encre);
-  padding: 0 0.5rem;
-}
-#observablehq-main form input[type="radio"] { accent-color: var(--gorri); }
-
-/* Graphiques Plot : grille pointillée, sans graduations. */
-#observablehq-main svg g[aria-label$="-grid"] { stroke: var(--grille); stroke-opacity: 1; stroke-dasharray: 2 4; }
-#observablehq-main svg g[aria-label$="-axis tick"] { display: none; }
-#observablehq-main svg g[aria-label$="-axis tick label"] { color: var(--encre-3); }
-
-/*
- * Mouvement : un seul moment orchestré, à l'accueil (les chiffres comptent, la courbe se trace).
- * Rien d'autre ne bouge sans action du visiteur.
- */
-@media (prefers-reduced-motion: no-preference) {
-  .trace g[aria-label="line"]:not(.segment-provisoire) path {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: tracer 1600ms cubic-bezier(0.65, 0, 0.35, 1) 250ms forwards;
-  }
-  .trace g[aria-label="area"] path,
-  .trace g.segment-provisoire path { opacity: 0; animation: apparaitre 700ms ease 1300ms forwards; }
-}
-@keyframes tracer { to { stroke-dashoffset: 0; } }
-@keyframes apparaitre { to { opacity: 1; } }
-
-/* Mobile. */
-@media (max-width: 720px) {
-  #observablehq-header { gap: 1rem; }
-  .marque { font-size: 0; gap: 0; }
-  .nav-principale { gap: 1rem; }
-  #observablehq-main { padding-left: 16px; padding-right: 16px; }
-  .phrase .ligne { grid-template-columns: 4.6ch 1fr; }
-  .indice a { grid-template-columns: 1fr auto; row-gap: 0.4rem; }
-  .indice .sparkline { grid-column: 1 / -1; }
-  .indice .evolution { text-align: left; }
-  .tuile .big { font-size: 2.2rem; }
-}
-
-/* Notes : texte discret, pas d'encadré « Note » (le callout Observable fait gabarit). */
 #observablehq-main .note {
   background: none;
   border: 0;
   border-radius: 0;
   padding: 0;
   margin: 0.75rem 0;
+  font-size: 0.85rem;
+  color: var(--texte-2);
 }
 #observablehq-main .note::before { display: none; }
-#observablehq-main :is(.phrase, .accueil-graphique, .indice) { max-width: none; }
-#observablehq-header a.marque { color: var(--encre); }
-#observablehq-main :is(.indice, .phrase) a, #observablehq-main :is(.indice, .phrase) a:hover { text-decoration: none; }
+.avertissement {
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--rayon);
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--bord));
+  font-size: 0.9rem;
+  color: var(--texte);
+}
+.sources {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--bord);
+  font-size: 0.8rem;
+  color: var(--texte-3);
+  max-width: 90ch;
+}
+.sources ul { padding-left: 1.1rem; margin: 0.4rem 0; }
+.statut-ok { color: var(--hausse); font-weight: 600; }
+.statut-alerte { color: var(--accent); font-weight: 600; }
+.statut-echec { color: var(--baisse); font-weight: 600; }
+
+/* Champs (Inputs) : libellé au-dessus, contrôle arrondi. */
+#observablehq-main form[class^="inputs-"] { --label-width: auto; width: auto; max-width: 100%; }
+#observablehq-main form[class^="inputs-"] > label { color: var(--texte-2); font-size: 0.85rem; margin-right: 0.6rem; }
+#observablehq-main form select, #observablehq-main form input[type="text"] {
+  min-height: 36px;
+  max-width: 100%;
+  border: 1px solid var(--bord);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--texte);
+  padding: 0 2rem 0 0.75rem;
+  font: 500 0.9rem var(--sans-serif);
+}
+
+/* Tableaux (Inputs.table) : sobres, à l'intérieur des panneaux. */
+#observablehq-main .panneau form[class^="inputs-"]:has(table) { width: 100%; margin: 0; }
+#observablehq-main table { font-size: 0.85rem; }
+#observablehq-main table thead th { color: var(--texte-2); font-weight: 500; border-bottom: 1px solid var(--bord); background: var(--surface); }
+#observablehq-main table tbody tr { border-bottom: 1px solid var(--bord); }
+#observablehq-main table tbody tr:hover { background: var(--surface-2); }
+
+/* Graphiques Plot : grille légère, sans graduations, libellés lisibles. */
+#observablehq-main svg[class^="plot-"] { font-size: 11px; }
+#observablehq-main svg g[aria-label$="-grid"] { stroke: var(--grille); stroke-opacity: 1; stroke-dasharray: 2 3; }
+#observablehq-main svg g[aria-label$="-axis tick"] { display: none; }
+#observablehq-main svg g[aria-label$="-axis tick label"], #observablehq-main svg g[aria-label$="-axis label"] { color: var(--texte-3); }
+
+/* Un seul mouvement : le tracé de la courbe d'accueil. */
+@media (prefers-reduced-motion: no-preference) {
+  .trace g[aria-label="line"]:not(.segment-provisoire) path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: tracer 1400ms cubic-bezier(0.65, 0, 0.35, 1) 200ms forwards;
+  }
+  .trace g[aria-label="area"] path,
+  .trace g.segment-provisoire path { opacity: 0; animation: apparaitre 600ms ease 1200ms forwards; }
+}
+@keyframes tracer { to { stroke-dashoffset: 0; } }
+@keyframes apparaitre { to { opacity: 1; } }
+
+/* Mobile. */
+@media (max-width: 720px) {
+  #observablehq-header { gap: 0.5rem; }
+  #observablehq-header a.marque { font-size: 0; gap: 0; }
+  #observablehq-main { padding-left: 16px; padding-right: 16px; }
+  .grille-2, .grille-carte { grid-template-columns: minmax(0, 1fr); }
+  .panneau { padding: 1rem; }
+  .tuile .big { font-size: 1.8rem; }
+}
+.portees { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+/* Tuiles d'une même rangée alignées : libellé, valeur, période sur les mêmes lignes. */
+@supports (grid-template-rows: subgrid) {
+  .tuiles, .indice { row-gap: 1rem; }
+  :is(.tuiles, .indice) > .tuile { display: grid; grid-row: span 5; grid-template-rows: subgrid; row-gap: 0.2rem; align-content: start; }
+  :is(.tuiles, .indice) > .tuile .big { align-self: end; }
+}

@@ -37,6 +37,7 @@ def ingerer_geo(cfg: Config, journal: Journal) -> set[str]:
                 {
                     "code": cfg.perimetre,
                     "libelle": dp["libelle"],
+                    "libelle_complement": dp["libelle_complement"],
                     "epci": info_epci,
                     "nb_communes": n,
                     "departements": departements,

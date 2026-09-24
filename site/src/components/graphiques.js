@@ -10,6 +10,7 @@ import {
   meta,
   moisLong,
   nombre,
+  nomCommune,
   parSecteur,
   pourcent,
   serieMensuelle,
@@ -21,20 +22,6 @@ import {
 export const COULEUR = "var(--serie-1)";
 export const COULEUR_N1 = "var(--serie-n1)";
 export const CATEGORIES = ["var(--serie-1)", "var(--serie-2)", "var(--serie-3)"];
-
-const reduireMouvement = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-/** Compteur animé jusqu'à la valeur publiée ; le texte final est toujours nombre(cible). */
-export function compter(el, cible) {
-  if (reduireMouvement()) return;
-  const t0 = performance.now();
-  const pas = (t) => {
-    const k = Math.min(1, (t - t0) / 900);
-    el.textContent = nombre(Math.round(cible * (1 - (1 - k) ** 3)));
-    if (k < 1) requestAnimationFrame(pas);
-  };
-  requestAnimationFrame(pas);
-}
 
 /** Mini-courbe des 24 derniers mois consolidés (mois provisoires exclus : pas de fausse tendance). */
 export function sparkline(ind, geo = "TOTAL") {
@@ -55,23 +42,91 @@ export function sparkline(ind, geo = "TOTAL") {
   });
 }
 
-/** Tuile chiffre-clé : valeur 12 mois glissants et évolution vs les 12 mois précédents. */
-export function tuile(ind, {geo = "TOTAL", lien} = {}) {
+/** Panneau : titre, portée des données (territoire, période) et contenu, qui changent ensemble. */
+export function panneau(titre, portees, ...contenu) {
+  const p = [portees].flat().filter(Boolean);
+  return html`<section class="panneau">
+    <header><h2>${titre}</h2>${p.length ? html`<span class="portees">${p.map((x) => html`<span class="portee">${x}</span>`)}</span>` : null}</header>
+    ${contenu}
+  </section>`;
+}
+
+/** Valeur publiée, ou mention explicite du secret statistique (jamais un zéro). */
+export const valeurOuSecret = (v, classe = "") =>
+  v == null
+    ? html`<span class="${classe} secret" title="Secret statistique : moins de ${meta.seuil_secret} événements ou case recalculable">secret</span>`
+    : html`<span class=${classe}>${nombre(v)}</span>`;
+
+/** Contenu d'une tuile : valeur 12 mois glissants et évolution vs les 12 mois précédents. */
+function contenuTuile(ind, geo) {
   const [precedente, derniere] = fenetres(ind);
   const a = cellule(ind, "12m", derniere, geo);
   const b = precedente ? cellule(ind, "12m", precedente, geo) : {v: null};
   const evo = evolution(a.v, b.v);
   // Évolution en encre neutre : une hausse n'est pas « bonne » par nature (défaillances, radiations).
   const fleche = evo == null ? "" : evo > 0 ? "▲ " : evo < 0 ? "▼ " : "";
-  return html`<a class="card tuile" href=${lien ?? "#"}>
-    <h2>${libelle(ind)}</h2>
-    <span class="big">${nombre(a.v)}</span>
-    <span class="muted">sur 12 mois (${libelleFenetre(derniere)})</span>
-    <span class="evolution">${
+  return [
+    html`<span class="tuile-nom">${libelle(ind)}</span>`,
+    valeurOuSecret(a.v, "big"),
+    html`<span class="muted">${geo === "TOTAL" ? "" : `${nomCommune.get(geo)}, `}sur 12 mois (${libelleFenetre(derniere)})</span>`,
+    html`<span class="evolution">${
       evo == null ? "évolution non calculable" : `${fleche}${evo > 0 ? "+" : ""}${pourcent(evo, 1)} sur un an`
-    }</span>
-    ${sparkline(ind, geo)}
-  </a>`;
+    }</span>`,
+    sparkline(ind, geo)
+  ];
+}
+
+/** Tuile chiffre-clé, cliquable si `lien` est fourni. */
+export function tuile(ind, {geo = "TOTAL", lien} = {}) {
+  return lien
+    ? html`<a class="tuile" href=${lien}>${contenuTuile(ind, geo)}</a>`
+    : html`<div class="tuile">${contenuTuile(ind, geo)}</div>`;
+}
+
+// Dernier onglet choisi par groupe : un changement de territoire ne réinitialise pas la mesure.
+const ongletsChoisis = new Map();
+
+/**
+ * Tuiles-onglets : la tuile choisie pilote les panneaux qui suivent (à utiliser avec view()).
+ * La valeur est le code de l'indicateur choisi.
+ */
+export function onglets(indicateurs, {geo = "TOTAL", cle = indicateurs.join()} = {}) {
+  const boutons = indicateurs.map(
+    (ind) => html`<button type="button" class="tuile" data-ind=${ind}>${contenuTuile(ind, geo)}</button>`
+  );
+  const el = html`<div class="tuiles" role="group" aria-label="Indicateur affiché">${boutons}</div>`;
+  const choisir = (ind) => {
+    el.value = ind;
+    ongletsChoisis.set(cle, ind);
+    for (const b of boutons) b.setAttribute("aria-pressed", String(b.dataset.ind === ind));
+  };
+  choisir(ongletsChoisis.get(cle) ?? indicateurs[0]);
+  for (const b of boutons)
+    b.onclick = () => {
+      if (b.dataset.ind === el.value) return;
+      choisir(b.dataset.ind);
+      el.dispatchEvent(new Event("input", {bubbles: true}));
+    };
+  return el;
+}
+
+/**
+ * Barres horizontales en HTML : libellé au-dessus de la barre (jamais tronqué, retour à la
+ * ligne sur mobile), valeur à droite. `n1` optionnel : barre fantôme de la période précédente.
+ * Une valeur masquée est écrite « secret », sans barre.
+ */
+export function barres(lignes, {fantome = false} = {}) {
+  const max = Math.max(1, ...lignes.flatMap((d) => [d.v ?? 0, fantome ? (d.n1 ?? 0) : 0]));
+  const largeur = (v) => `${(100 * v) / max}%`;
+  return html`<ol class="barres">${lignes.map(
+    (d) => html`<li>
+      <span class="barres-libelle">${d.libelle}</span>
+      ${valeurOuSecret(d.v, "barres-valeur")}
+      <span class="barres-piste" aria-hidden="true">${
+        fantome && d.n1 != null ? html`<i class="fantome" style=${{width: largeur(d.n1)}}></i>` : null
+      }${d.v == null ? null : html`<i style=${{width: largeur(d.v)}}></i>`}</span>
+    </li>`
+  )}</ol>`;
 }
 
 let identifiants = 0;
@@ -134,7 +189,7 @@ export function graphiqueMensuel(ind, {geo = "TOTAL", niv = "T", sect = "", widt
             dx: -4,
             dy: 4,
             fontSize: 11,
-            fill: "var(--encre-3)"
+            fill: "var(--texte-3)"
           })
         : null,
       Plot.rectX(masques, {x1: "date", x2: (d) => moisSuivant(d.date), fill: `url(#hachure-${id})`}),
@@ -161,7 +216,7 @@ export function graphiqueMensuel(ind, {geo = "TOTAL", niv = "T", sect = "", widt
           x: "date",
           y: (d) => d.v ?? 0,
           r: 4.5,
-          fill: "var(--gorri)",
+          fill: "var(--accent)",
           stroke: "var(--theme-background)",
           strokeWidth: 2,
           fillOpacity: (d) => (d.v == null ? 0 : 1),
@@ -171,8 +226,8 @@ export function graphiqueMensuel(ind, {geo = "TOTAL", niv = "T", sect = "", widt
       Plot.tip(
         s,
         Plot.pointerX({
-          fill: "var(--chaux)",
-          stroke: "var(--trait)",
+          fill: "var(--surface)",
+          stroke: "var(--bord)",
           x: "date",
           y: (d) => d.v ?? 0,
           title: (d) =>
@@ -195,33 +250,22 @@ export function legendeMensuelle() {
   return html`<div class="legende">
     <span><i style="background:var(--serie-1)"></i>mois courant</span>
     <span><i style="background:var(--serie-n1)"></i>même mois un an avant</span>
-    <span><i class="zone"></i>mois provisoires (incomplets, en pointillés)</span>
+    <span><i class="pointille"></i><i class="zone"></i>mois provisoires (incomplets)</span>
     <span><i class="hachure"></i>mois masqué (secret statistique)</span>
   </div>`;
 }
 
-/** Barres horizontales par section NAF sur 12 mois (magnitude : une seule teinte). */
-export function barresSecteurs(ind, {geo = "TOTAL", niv = "S", width, max = 25} = {}) {
+/** Barres par section NAF sur les 12 derniers mois consolidés (magnitude : une seule teinte). */
+export function barresSecteurs(ind, {geo = "TOTAL", niv = "S", max = 25} = {}) {
   const [, fin] = fenetres(ind);
   const donnees = parSecteur(ind, fin, geo, niv)
     .filter((d) => d.v != null)
     .sort((a, b) => b.v - a.v)
     .slice(0, max);
   const masquees = parSecteur(ind, fin, geo, niv).filter((d) => d.v == null).length;
-  const graphique = Plot.plot({
-    width,
-    height: 26 * donnees.length + 40,
-    marginLeft: Math.min(320, width * 0.48),
-    x: {grid: true, label: `événements sur 12 mois (${libelleFenetre(fin)})`, tickFormat: (d) => nombre(d)},
-    y: {label: null, domain: donnees.map((d) => d.libelle)},
-    marks: [
-      Plot.barX(donnees, {x: "v", y: "libelle", fill: COULEUR, rx: 4, insetTop: 3, insetBottom: 3, tip: {fill: "var(--chaux)", stroke: "var(--trait)"}}),
-      Plot.ruleX([0], {stroke: "var(--axe)"}),
-      Plot.text(donnees, {x: "v", y: "libelle", text: (d) => nombre(d.v), dx: 4, textAnchor: "start", fill: "var(--theme-foreground-muted)"})
-    ],
-    style: {overflow: "visible"}
-  });
-  return html`<div>${graphique}${
+  return html`<div>${
+    donnees.length ? barres(donnees) : html`<p class="note">Aucun secteur publiable sur cette période.</p>`
+  }${
     masquees ? html`<p class="note">${masquees} secteur(s) non affiché(s) : secret statistique (moins de ${meta.seuil_secret} événements ou case recalculable).</p>` : ""
   }</div>`;
 }
@@ -251,7 +295,7 @@ ${
     color: {
       type: "quantile",
       n: 5,
-      range: ["#dde6e0", "#afc7ba", "#7ca590", "#4d8169", "#2c5e4a"],
+      range: ["#dfe7f0", "#b3c6da", "#83a2c2", "#5579a3", "#2f5378"],
       domain: connus.map((d) => d.pour1000),
       label: `pour 1 000 habitants (${libelleFenetre(fin)})`,
       legend: true,
@@ -271,7 +315,7 @@ ${
         stroke: "var(--theme-background)",
         strokeWidth: 0.6
       }),
-      Plot.tip(contours.features, Plot.pointer(Plot.geoCentroid({title: titre, fill: "var(--chaux)", stroke: "var(--trait)"})))
+      Plot.tip(contours.features, Plot.pointer(Plot.geoCentroid({title: titre, fill: "var(--surface)", stroke: "var(--bord)"})))
     ]
   });
   return html`<div>${carte}<p class="note">Hachuré : commune sous secret statistique (moins de ${meta.seuil_secret} événements, ou valeur masquée pour empêcher un recalcul). Survolez une commune pour le détail.</p></div>`;

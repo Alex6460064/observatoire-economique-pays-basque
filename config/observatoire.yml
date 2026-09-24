@@ -6,11 +6,14 @@ perimetre_defaut: capb
 perimetres:
   capb:
     libelle: "Communauté d'agglomération Pays Basque"
+    # Complément avec son article, pour les phrases du site (« les N communes … »).
+    libelle_complement: "de la Communauté d'agglomération Pays Basque"
     epci: "200067106"           # vérifié sur geo.api.gouv.fr le 23/09/2026 : 158 communes
   bab_littoral:
     # Sous-périmètre de développement (runs rapides). Filtre appliqué APRÈS lecture
     # de l'EPCI : une commune qui quitterait la CAPB sortirait aussi de ce périmètre.
     libelle: "BAB + littoral (développement)"
+    libelle_complement: "du littoral basque"
     epci: "200067106"
     communes: ["64102", "64024", "64122", "64140", "64125", "64249", "64483", "64189", "64545", "64260"]
 

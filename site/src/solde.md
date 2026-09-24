@@ -8,14 +8,14 @@ title: Solde indicatif
 
 ```js
 import {serieMensuelle, cellule, fenetres, libelleFenetre, communes, nombre, pourcent} from "./components/donnees.js";
-import {tuile, sources} from "./components/graphiques.js";
+import {tuile, panneau, sources} from "./components/graphiques.js";
 ```
 
-<div class="grid grid-cols-3">
+<div class="tuiles">
   ${tuile("immatriculations_rcs")}
   ${tuile("radiations_rcs")}
-  <div class="card tuile">
-    <h2>Solde sur 12 mois</h2>
+  <div class="tuile">
+    <span class="tuile-nom">Solde sur 12 mois</span>
     <span class="big">${soldeTexte}</span>
     <span class="muted">${libelleFenetre(derniere)}</span>
   </div>
@@ -36,31 +36,6 @@ const solde = serieMensuelle("immatriculations_rcs").map((d, i) => {
 });
 ```
 
-## Flux mensuels
-
-<div class="legende">
-  <span><i style="background:var(--serie-1)"></i>Immatriculations</span>
-  <span><i style="background:var(--serie-2)"></i>Radiations</span>
-</div>
-
-```js
-display(resize((width) => Plot.plot({
-  width,
-  height: 280,
-  marginLeft: 44,
-  x: {type: "utc", label: null},
-  y: {grid: true, label: "annonces / mois", zero: true},
-  color: {domain: ["Immatriculations", "Radiations"], range: ["var(--serie-1)", "var(--serie-2)"]},
-  marks: [
-    Plot.lineY(flux, {x: "date", y: "v", stroke: "flux", strokeWidth: 2}),
-    Plot.text(flux, Plot.selectLast({x: "date", y: "v", z: "flux", text: "flux", dx: 6, textAnchor: "start", fill: "var(--theme-foreground-muted)"})),
-    Plot.ruleY([0], {stroke: "var(--axe)"}),
-    Plot.tip(flux, Plot.pointer({x: "date", y: "v", title: (d) => `${d.flux}, ${d.periode}${d.provisoire ? " (provisoire)" : ""} : ${nombre(d.v)}`}))
-  ],
-  marginRight: 110
-})));
-```
-
 ```js
 // Détection automatique des mois atypiques (plus de deux fois la médiane de la série).
 const atypiques = ["immatriculations_rcs", "radiations_rcs"].flatMap((ind) => {
@@ -68,35 +43,51 @@ const atypiques = ["immatriculations_rcs", "radiations_rcs"].flatMap((ind) => {
   const med = d3.median(s, (d) => d.v);
   return s.filter((d) => d.v > 2 * med).map((d) => ({ind, periode: d.periode, v: d.v, med}));
 });
-if (atypiques.length) display(html`<p class="note"><strong>Mois atypiques</strong> (plus de deux fois la médiane) : ${atypiques.map((a) => `${a.ind === "radiations_rcs" ? "radiations" : "immatriculations"} ${a.periode} (${nombre(a.v)})`).join(", ")}. Ces pics correspondent à des annonces publiées en nombre sur un même mois${atypiques.some((a) => a.ind === "radiations_rcs") ? " (pour les radiations, vraisemblablement des radiations administratives groupées par les greffes)" : ""} : ils ne traduisent pas des événements économiques survenus ce seul mois.</p>`);
+display(panneau("Flux mensuels", "Tout le territoire",
+  html`<div class="legende">
+    <span><i style="background:var(--serie-1)"></i>Immatriculations</span>
+    <span><i style="background:var(--serie-2)"></i>Radiations</span>
+  </div>`,
+  resize((width) => Plot.plot({
+    width,
+    height: 280,
+    marginLeft: 44,
+    x: {type: "utc", label: null},
+    y: {grid: true, label: "annonces / mois", zero: true, tickFormat: (d) => nombre(d)},
+    color: {domain: ["Immatriculations", "Radiations"], range: ["var(--serie-1)", "var(--serie-2)"]},
+    marks: [
+      Plot.lineY(flux, {x: "date", y: "v", stroke: "flux", strokeWidth: 2}),
+      Plot.ruleY([0], {stroke: "var(--axe)"}),
+      Plot.tip(flux, Plot.pointer({x: "date", y: "v", title: (d) => `${d.flux}, ${d.periode}${d.provisoire ? " (provisoire)" : ""} : ${nombre(d.v)}`}))
+    ]
+  })),
+  atypiques.length ? html`<p class="note"><strong>Mois atypiques</strong> (plus de deux fois la médiane) : ${atypiques.map((a) => `${a.ind === "radiations_rcs" ? "radiations" : "immatriculations"} ${a.periode} (${nombre(a.v)})`).join(", ")}. Ces pics correspondent à des annonces publiées en nombre sur un même mois${atypiques.some((a) => a.ind === "radiations_rcs") ? " (pour les radiations, vraisemblablement des radiations administratives groupées par les greffes)" : ""} : ils ne traduisent pas des événements économiques survenus ce seul mois.</p>` : null
+));
 ```
-
-## Solde mensuel
 
 ```js
-display(resize((width) => Plot.plot({
-  width,
-  height: 220,
-  marginLeft: 44,
-  x: {type: "utc", label: null},
-  y: {grid: true, label: "immatriculations − radiations"},
-  marks: [
-    Plot.rectY(solde.filter((d) => d.solde != null), {
-      x1: "date",
-      x2: (d) => new Date(+d.date + 27 * 864e5),
-      y: "solde",
-      fill: (d) => (d.solde >= 0 ? "var(--serie-1)" : "var(--negatif)"),
-      tip: true,
-      title: (d) => `${d.periode}${d.provisoire ? " (provisoire)" : ""} : ${d.solde > 0 ? "+" : ""}${nombre(d.solde)}`
-    }),
-    Plot.ruleY([0], {stroke: "var(--axe)"})
-  ]
-})));
+display(panneau("Solde mensuel", "Tout le territoire",
+  resize((width) => Plot.plot({
+    width,
+    height: 220,
+    marginLeft: 44,
+    x: {type: "utc", label: null},
+    y: {grid: true, label: "immatriculations − radiations", tickFormat: (d) => nombre(d)},
+    marks: [
+      Plot.rectY(solde.filter((d) => d.solde != null), {
+        x1: "date",
+        x2: (d) => new Date(+d.date + 27 * 864e5),
+        y: "solde",
+        fill: (d) => (d.solde >= 0 ? "var(--serie-1)" : "var(--negatif)"),
+        tip: true,
+        title: (d) => `${d.periode}${d.provisoire ? " (provisoire)" : ""} : ${d.solde > 0 ? "+" : ""}${nombre(d.solde)}`
+      }),
+      Plot.ruleY([0], {stroke: "var(--axe)"})
+    ]
+  })),
+  html`<p class="note">Bleu : plus d'immatriculations que de radiations ; rouge : l'inverse. Barre absente : l'un des deux flux est masqué (secret statistique). Les trois derniers mois sont provisoires.</p>`
+));
 ```
-
-<p class="note">Foncé : plus d'immatriculations que de radiations ; rouge : l'inverse. Barre absente : l'un des deux flux est masqué (secret statistique). Les trois derniers mois sont provisoires.</p>
-
-## Par commune, 12 derniers mois consolidés
 
 ```js
 const lignes = communes.map((c) => {
@@ -104,11 +95,11 @@ const lignes = communes.map((c) => {
   const r = cellule("radiations_rcs", "12m", derniere, c.code_commune).v;
   return {commune: c.nom_commune, immatriculations: i, radiations: r, solde: i == null || r == null ? null : i - r};
 }).sort((a, b) => (b.immatriculations ?? -1) - (a.immatriculations ?? -1));
-display(Inputs.table(lignes, {
+display(panneau("Par commune", ["Toutes les communes", libelleFenetre(derniere)], Inputs.table(lignes, {
   format: {immatriculations: nombre, radiations: nombre, solde: (v) => (v == null ? "–" : `${v > 0 ? "+" : ""}${nombre(v)}`)},
   header: {commune: "Commune", immatriculations: "Immatriculations", radiations: "Radiations", solde: "Solde"},
   rows: 12
-}));
+})));
 ```
 
 ```js
