@@ -73,6 +73,8 @@ jobs:
         run: |
           npm ci
           npm run build
+          # og:image : Observable ne publie pas les fichiers non référencés (et les renomme avec un hash).
+          cp src/apercu.png dist/apercu.png
 
       - uses: actions/upload-pages-artifact@v5
         with:

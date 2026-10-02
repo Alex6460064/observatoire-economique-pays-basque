@@ -15,7 +15,15 @@ export default {
   head: '<script>try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}</script>' +
     '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' +
     '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;650;700&display=swap">' +
-    '<meta name="robots" content="index,follow"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%221%22 fill=%22%23b3262d%22/%3E%3Cpath d=%22M3 12 L6 8 L9 10 L13 4%22 stroke=%22white%22 stroke-width=%221.6%22 fill=%22none%22/%3E%3C/svg%3E">',
+    '<meta name="robots" content="index,follow">' +
+    '<meta property="og:type" content="website"><meta property="og:locale" content="fr_FR">' +
+    '<meta property="og:site_name" content="Observatoire économique du Pays Basque">' +
+    '<meta property="og:title" content="Observatoire économique du Pays Basque">' +
+    '<meta property="og:description" content="Créations, défaillances et cessions d\'entreprises au Pays Basque, mises à jour chaque jour à partir des données publiques.">' +
+    '<meta property="og:url" content="https://alex6460064.github.io/observatoire-economique-pays-basque/">' +
+    '<meta property="og:image" content="https://alex6460064.github.io/observatoire-economique-pays-basque/apercu.png">' +
+    '<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">' +
+    '<meta name="twitter:card" content="summary_large_image"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22%3E%3Crect width=%2216%22 height=%2216%22 rx=%221%22 fill=%22%23b3262d%22/%3E%3Cpath d=%22M3 12 L6 8 L9 10 L13 4%22 stroke=%22white%22 stroke-width=%221.6%22 fill=%22none%22/%3E%3C/svg%3E">',
   // Navigation horizontale dans l'en-tête (pas de barre latérale) : voir header().
   sidebar: false,
   pages: [
