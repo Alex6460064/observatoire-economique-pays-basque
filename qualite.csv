@@ -122,7 +122,7 @@ date_run,metrique,valeur
 2026-10-02,annonces_annulees_ou_rectifiees,376.0
 2026-10-02,annonces_extraites,39313.0
 2026-10-02,dates_jugement_incoherentes,19.0
-2026-10-02,taux_jointure_sirene,0.993554979171579
+2026-10-02,taux_jointure_sirene,0.99365977625822
 2026-10-02,taux_localisation,0.9945012190693573
 2026-10-02,taux_localisation_cp_ville,0.9851636665456244
 2026-10-02,taux_secteur_connu_perimetre,0.9607489597780859
@@ -130,7 +130,7 @@ date_run,metrique,valeur
 2026-10-02,taux_secteur_sirene_perimetre,0.9394822006472492
 2026-10-02,taux_siren_present,0.9900140063287856
 2026-10-02,creations_sans_naf,0.0
-2026-10-02,dates_creation_futures,57.0
-2026-10-02,etablissements_extraits,498237.0
-2026-10-02,part_diffusion_partielle,0.30942547070384824
-2026-10-02,reprises_transferts_exclus,7285.0
+2026-10-02,dates_creation_futures,60.0
+2026-10-02,etablissements_extraits,498341.0
+2026-10-02,part_diffusion_partielle,0.3093308307027273
+2026-10-02,reprises_transferts_exclus,7296.0
